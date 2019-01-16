@@ -7,16 +7,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import edu.wpi.first.wpilibj.*;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,18 +17,20 @@ import com.ctre.phoenix.motorcontrol.can.*;
  * project.
  */
 public class Robot extends TimedRobot {
-  Joystick joy = new Joystick(0);
-VictorSPX name = new VictorSPX(1);
+  private RobotVault myRobot;
+  
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
    */
   @Override
   public void robotInit() {
+    myRobot = new RobotVault();
   }
 
   @Override
   public void robotPeriodic() {
+    myRobot.periodicTasks();
   }
 
   @Override
@@ -57,7 +50,6 @@ VictorSPX name = new VictorSPX(1);
   @Override
   public void teleopPeriodic() {
 
-    name.set(ControlMode.PercentOutput, joy.getThrottle());
   }
 
   /**
