@@ -22,14 +22,12 @@ import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
 
-import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Size;
+import org.opencv.core.KeyPoint;
 
 /*
    JSON format:
@@ -200,6 +198,7 @@ public final class Main {
     return camera;
   }
 
+
   /**
    * Main.
    */
@@ -222,25 +221,35 @@ public final class Main {
       System.out.println("Setting up NetworkTables client for team " + team);
       ntinst.startClientTeam(team);
     }
+    NetworkTableEntry ent = ntinst.getEntry("PointX");
 
     // start cameras
     List<VideoSource> cameras = new ArrayList<>();
     for (CameraConfig cameraConfig : cameraConfigs) {
       cameras.add(startCamera(cameraConfig));
     }
-    BallPipe test = new BallPipe();
+
+    BallPipe ballPipe = new BallPipe();
+
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0),
-        test, pipeline -> {
-          // do something with pipeline results
-          MatOfKeyPoint points = test.findBlobsOutput();
-          KeyPoint[] arr = points.toArray();
-          for(KeyPoint point : arr) {
-            System.out.println("x coord: " + point.pt.x);
-            System.out.println("y coord: " + point.pt.y);
-            System.out.println();
-          }
+        ballPipe, pipeline -> {
+        // do something with pipeline results
+        KeyPoint[] arr = ballPipe.findBlobsOutput().toArray();
+
+        if(arr.length == 0) {
+          System.out.println("Nothing found");
+        } else {
+          KeyPoint point = arr[0];
+          System.out.println("x coord: " + point.pt.x);
+          System.out.println("y coord: " + point.pt.y);
+          System.out.println();
+          
+          ent.setValue(point.pt.x);
+        }
+
+        
       });
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),

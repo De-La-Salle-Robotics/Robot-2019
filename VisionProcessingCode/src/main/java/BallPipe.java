@@ -51,9 +51,9 @@ public class BallPipe implements VisionPipeline {
 
 		// Step HSL_Threshold0:
 		Mat hslThresholdInput = cvResizeOutput;
-		double[] hslThresholdHue = {0.0, 180.0};
-		double[] hslThresholdSaturation = {96.31294964028777, 255.0};
-		double[] hslThresholdLuminance = {29.81115107913669, 98.34470989761094};
+		double[] hslThresholdHue = {0.0, 17.201365187713307};
+		double[] hslThresholdSaturation = {89.40620559945637, 255.0};
+		double[] hslThresholdLuminance = {0.0, 126.62969283276453};
 		hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance, hslThresholdOutput);
 
 		// Step CV_erode0:
