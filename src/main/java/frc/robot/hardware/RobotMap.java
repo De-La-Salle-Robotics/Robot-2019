@@ -12,6 +12,9 @@ public class RobotMap{
     public static VictorSPX leftSlave = new VictorSPX(2);
     public static VictorSPX rightDrivetrain = new VictorSPX(3);
     public static VictorSPX rightSlave = new VictorSPX(4);
+
+    public static VictorSPX arm = new VictorSPX(5);
+
     public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
     public static Joystick joy1 = new Joystick(0);
     
@@ -27,6 +30,6 @@ public class RobotMap{
         leftDrivetrain.setInverted(false);
         rightDrivetrain.setInverted(true);
 
-
+        arm.setInverted(false);
     }
 }
