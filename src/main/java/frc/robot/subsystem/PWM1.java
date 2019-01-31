@@ -6,32 +6,31 @@ import edu.wpi.first.wpilibj.Servo;
 public class PWM1{
     public Servo servo1;
     public Servo servo2;
+
+    final int kAngleMax1 = 120; 
+    final int kAngleMax2 = 120;
+    final int kAngleMin1 = 40;
+    final int kAngleMin2 = 40;
+
+
     public PWM1( Servo servo1 , Servo servo2){ 
         this.servo1 = servo1;
-        this.servo2 = servo2;}
-    
-        
-      
-
+        this.servo2 = servo2;
+    }
        
-    final int kAngleMax = 0; 
-     final int kAngleMin = 0;
    
   
 
 
 public void pwmServoControl(boolean clawClose, boolean clawOpen) {
-    double pwmServoPower = 0;
 
     if(clawClose) {
-        servo1.setAngle(kAngleMax);
-        servo2.setAngle(kAngleMax);
+        servo1.setAngle(kAngleMax1);
+        servo2.setAngle(kAngleMax2);
     } else if(clawOpen){
-       servo1.setAngle(kAngleMin);
-       servo2.setAngle(kAngleMin);
+       servo1.setAngle(kAngleMin1);
+       servo2.setAngle(kAngleMin2);
     }else{
-        servo1.setAngle(kAngleMin);
-        servo2.setAngle(kAngleMin);
         
     }
  }
