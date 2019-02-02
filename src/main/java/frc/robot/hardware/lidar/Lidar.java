@@ -3,98 +3,111 @@ package frc.robot.hardware.lidar;
 import edu.wpi.first.wpilibj.SerialPort;
 
 public class Lidar {
+    /* Constants used for the TFMini Lidar */
     private final int BAUD_RATE = 115200;
     private final int DATA_BITS = 8;
     private final SerialPort.StopBits STOP_BITS = SerialPort.StopBits.kOne;
     private final SerialPort.Parity PARITY_BITS = SerialPort.Parity.kNone;
 
-    private final byte HEADER_1 = 0x59;
-    private final byte HEADER_2 = 0x59;
+    private final byte HEADER = 0x59;
     
+    /* Reference to Serial Port */
     private SerialPort _portReference;
 
-    public int strength = 0;
-    public int distance = 0;
+    /* Size of buffer */
+    private final int BUFFER_SIZE = 128;
 
+    /* Variables to operate the Lidar faster */
+    private byte[] _buf;
+    private int _startPointer;
+    private int _endPointer;
+
+    /* Variables we're concerned with */
+    private short _strength = 0;
+    public short getStrength() { return _strength; }
+    private short _distance = 0;
+    public short getDistance(){ return _distance; }
+
+    /* Constructor for LIDAR, has to specify a Serial Port */
     public Lidar(SerialPort.Port port)
     {
         _portReference = new SerialPort(BAUD_RATE, port, DATA_BITS, PARITY_BITS, STOP_BITS);
+        _buf = new byte[BUFFER_SIZE];
+        _startPointer = 0;
+        _endPointer = 0;
     }
 
-    public void updateBuf()
+    /* Local method used to get the size of the buffer */
+    private int getBufSize()
     {
+        if(_endPointer < _startPointer) return _endPointer - _startPointer + BUFFER_SIZE;
+        return _endPointer - _startPointer;
+    }
+
+    /* Local method to fill buffer with serial port buffer */
+    private void updateBuf()
+    {
+        /* Create temporary buffer with serial values */
         byte[] buf = _portReference.read(_portReference.getBytesReceived());
-
-        int state = 0;
-
-        int tmpDistance = 0;
-        int goodDistance = 0;
-        int tmpStrength = 0;
-        int goodStrength = 0;
-
-        byte runningChecksum = 0;
-
-        for(int i = 0; i < buf.length; i++)
+        /* Fill local buffer with serial buffer */
+        for(byte b : buf)
         {
-            switch(state)
+            _buf[_endPointer++] = b;
+            if(_endPointer > BUFFER_SIZE) _endPointer = 0;
+            if(_endPointer == _startPointer) 
             {
-                case 0:
-                    runningChecksum = 0;
-                    if(buf[i] == HEADER_1)
-                        state = 1;
-                    runningChecksum += buf[i];
-                    break;
-                case 1:
-                    if(buf[i] == HEADER_2)
-                        state = 2;
-                    else
-                        state = 0;
-                    runningChecksum += buf[i];
-                    break;
-                case 2:
-                    tmpDistance = buf[i];
-                    runningChecksum += buf[i];
-                    state = 3;
-                    break;
-                case 3:
-                    tmpDistance |= buf[i] << 8;
-                    runningChecksum += buf[i];
-                    state = 4;
-                    break;
-                case 4:
-                    tmpStrength = buf[i];
-                    runningChecksum += buf[i];
-                    state = 5;
-                    break;
-                case 5:
-                    tmpStrength |= buf[i] << 8;
-                    runningChecksum += buf[i];
-                    state = 6;
-                    break;
-                case 6:
-                    runningChecksum += buf[i];
-                    state = 7;
-                    break;
-                case 7:
-                    runningChecksum += buf[i];
-                    state = 8;
-                    break;
-                case 8:
-                    // This is the checksum byte, it is all other bytes added together
-                    // If subtracting this from running checksum = 0, we're good
-                    runningChecksum -= buf[i];
-                    state = 0;
-                    break;
-            }
-            if(runningChecksum == 0)
-            {
-                goodDistance = tmpDistance;
-                goodStrength = tmpStrength;
+                break;
             }
         }
+    }
 
-        distance = goodDistance;
-        strength = goodStrength;
+    /* Public method to update the distance and strength values */
+    public void updateValues()
+    {
+        /* First we update the buffer to make sure we have latest values */
+        updateBuf();
+        /* If it's not large enough to hold data, return right away */
+        if(getBufSize() < 9) return;
+
+        /* Create local variable to handle where we are in the buffer */
+        int tmpStart = _startPointer;
+        if(getBufSize() > 17)
+        {
+            tmpStart = _endPointer - 18;
+        }
+        if(tmpStart < 0) tmpStart += BUFFER_SIZE;
+
+        /* Move buffer pointer to the last point so we know we have latest data */
+        while(_buf[tmpStart] != HEADER && _buf[tmpStart + 1] != HEADER)
+        {
+            tmpStart++;
+            if(tmpStart == BUFFER_SIZE) tmpStart = 0;
+        }
+
+        /* Temporary variables in case checksum fails */
+        byte checksum = 0;
+        short tmpDis = 0;
+        short tmpStr = 0;
+        /* Parse data */
+        for(int i = 0; i < 9; i++)
+        {
+            checksum += _buf[tmpStart];
+            tmpStart++;
+            if(tmpStart == BUFFER_SIZE) tmpStart = 0;
+            if(i == 2) tmpDis = _buf[tmpStart];
+            if(i == 3) tmpDis |= ((short)_buf[tmpStart] << 8);
+            if(i == 4) tmpStr = _buf[tmpStart];
+            if(i == 5) tmpStr |= ((short)_buf[tmpStart] << 8);
+            if(i == 8) checksum -= (_buf[tmpStart] * 2);
+        }
+        /* If checksum works out, we can update public variables */
+        if(checksum == 0)
+        {
+            _distance = tmpDis;
+            _strength = tmpStr;
+        }
+        /* Essentially clear the buffer */
+        _startPointer = _endPointer;
     }
 
 }
