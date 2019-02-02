@@ -6,14 +6,14 @@ import frc.robot.subsystem.*;
 public class RobotVault{
     private Drivetrain drivetrain;
     private Arm arm;
-    private PWM1 claw;
+    private Claw claw;
 
     public RobotVault(){
         RobotMap.initialize();
 
         //drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain);
         arm = new Arm(RobotMap.rightDrivetrain);
-        claw = new PWM1(RobotMap.claw1, RobotMap.claw2);
+        claw = new Claw(RobotMap.claw1, RobotMap.claw2);
     }
     public void periodicTasks(){
         double throttle = -RobotMap.joy1.getRawAxis(1);
@@ -27,6 +27,6 @@ public class RobotVault{
 
         //drivetrain.arcadeDrive(throttle, wheel);
         arm.armControl(up, down);
-        claw.pwmServoControl(close, open);
+        claw.clawControl(close, open);
     }
 }

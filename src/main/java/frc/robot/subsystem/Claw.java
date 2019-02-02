@@ -1,9 +1,8 @@
 package frc.robot.subsystem;
 
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Servo;
 
-public class PWM1{
+public class Claw{
     public Servo servo1;
     public Servo servo2;
 
@@ -13,7 +12,7 @@ public class PWM1{
     final int kAngleMin2 = 40;
 
 
-    public PWM1( Servo servo1 , Servo servo2){ 
+    public Claw( Servo servo1 , Servo servo2){ 
         this.servo1 = servo1;
         this.servo2 = servo2;
     }
@@ -22,7 +21,7 @@ public class PWM1{
   
 
 
-public void pwmServoControl(boolean clawClose, boolean clawOpen) {
+public void clawControl(boolean clawClose, boolean clawOpen) {
 
     if(clawClose) {
         servo1.setAngle(kAngleMax1);
