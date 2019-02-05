@@ -4,6 +4,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
+import com.ctre.phoenix.CANifier;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
@@ -14,6 +15,7 @@ public class RobotMap{
     public static VictorSPX rightSlave = new VictorSPX(4);
     public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
     public static Joystick joy1 = new Joystick(0);
+    public static CANifier can1 = new CANifier(0);
     
     public static void initialize(){
         CameraServer.getInstance().startAutomaticCapture();
