@@ -76,7 +76,7 @@ public class TPixy2
             return System.currentTimeMillis();
         }
 
-        public int Init(edu.wpi.first.wpilibj.I2C portDef)
+        public int Init(edu.wpi.first.wpilibj.I2C.Port portDef)
         {
             long t0;
             int res;

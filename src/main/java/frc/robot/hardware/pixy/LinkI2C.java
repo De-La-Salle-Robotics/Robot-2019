@@ -1,5 +1,7 @@
 package frc.robot.hardware.pixy;
 
+import edu.wpi.first.wpilibj.I2C;
+
 public class LinkI2C implements LinkType
 {
     public final int PIXY_I2C_DEFAULT_ADDR = 0x54;
@@ -23,10 +25,10 @@ public class LinkI2C implements LinkType
     }
     public int bufferSize() { return (int)(end - start); }
 
-    public int open(edu.wpi.first.wpilibj.I2C portDef)
+    public int open(edu.wpi.first.wpilibj.I2C.Port portDef)
     {
 
-        m_I2CPort = portDef;
+        m_I2CPort = new I2C(portDef, PIXY_I2C_DEFAULT_ADDR);
 
         m_localBuf = new byte[bufSize];
         start = end = 0;
