@@ -8,16 +8,14 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class RobotMap{
-    public static VictorSPX leftDrivetrain = new VictorSPX(1);
-    public static VictorSPX leftSlave = new VictorSPX(2);
-    public static VictorSPX rightDrivetrain = new VictorSPX(3);
-    public static VictorSPX rightSlave = new VictorSPX(4);
-    public static PowerDistributionPanel pdp = new PowerDistributionPanel(0);
-    public static Joystick joy1 = new Joystick(0);
+    public static final VictorSPX leftDrivetrain = new VictorSPX(1);
+    public static final VictorSPX leftSlave = new VictorSPX(2);
+    public static final VictorSPX rightDrivetrain = new VictorSPX(3);
+    public static final VictorSPX rightSlave = new VictorSPX(4);
+    public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
+    public static final Joystick joy1 = new Joystick(0);
     
     public static void initialize(){
-        CameraServer.getInstance().startAutomaticCapture();
-
         leftSlave.follow(leftDrivetrain);
         rightSlave.follow(rightDrivetrain);
 
