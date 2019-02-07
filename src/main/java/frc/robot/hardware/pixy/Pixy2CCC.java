@@ -168,36 +168,4 @@ public class Pixy2CCC
         else
             return PIXY_RESULT_ERROR;  // some kind of bitstream error
     }
-    public Block getBlock()
-    {
-        parseBlocks(CCC_SIG_ALL, 255);
-
-        //Check every block to find the one I'm looking for
-        for(Block b : blocks)
-        {
-            //Found it, return it
-            if (b != null)
-            {
-                if (b.m_index == m_goodIndex)
-                {
-                    m_timeSinceLastGoodBlock.start();
-                    m_goodBlock = b;
-                    m_goodIndex = b.m_index;
-                    return b;
-                }
-            }
-            else
-                break; //Hit a null value so just break the loop
-        }
-        if (m_timeSinceLastGoodBlock.getDurationMs() > 100)
-        {
-            if (blocks[0] == null) return null;
-            //Couldn't find it, use the largest block instead
-            m_goodIndex = blocks[0].m_index;
-            m_goodBlock = blocks[0];
-            return blocks[0];
-        }
-        else
-            return m_goodBlock;
-    }
 }
