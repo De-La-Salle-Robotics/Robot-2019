@@ -15,7 +15,7 @@ public class Lidar {
     private SerialPort _portReference;
 
     /* Size of buffer */
-    private final int BUFFER_SIZE = 128;
+    private final int BUFFER_SIZE = 1024; //There's ~300 bytes every time we get called, we should make sure the buffer can hold that many bytes
 
     /* Variables to operate the Lidar faster */
     private byte[] _buf;
@@ -47,17 +47,20 @@ public class Lidar {
     /* Local method to fill buffer with serial port buffer */
     private void updateBuf()
     {
+        /* NOTE: We don't keep track of overflows with this method */
+        
+        int bytesReceived = _portReference.getBytesReceived();
         /* Create temporary buffer with serial values */
-        byte[] buf = _portReference.read(_portReference.getBytesReceived());
+        byte[] buf = _portReference.read(bytesReceived);
         /* Fill local buffer with serial buffer */
-        for(byte b : buf)
+        if(bytesReceived + _endPointer >= BUFFER_SIZE)
         {
-            _buf[_endPointer++] = b;
-            if(_endPointer > BUFFER_SIZE) _endPointer = 0;
-            if(_endPointer == _startPointer) 
-            {
-                break;
-            }
+            System.arraycopy(buf, 0, _buf, _endPointer, BUFFER_SIZE - _endPointer);
+            System.arraycopy(buf, BUFFER_SIZE - _endPointer, _buf, 0, bytesReceived - (BUFFER_SIZE - _endPointer));
+        }
+        else
+        {
+            System.arraycopy(buf, 0, _buf, _endPointer, bytesReceived);
         }
     }
 
