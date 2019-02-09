@@ -3,6 +3,7 @@ package frc.robot.hardware;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import frc.robot.hardware.configuration.LeftDriveConfiguration;
 
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -17,6 +18,8 @@ public class RobotMap{
     public static final Joystick joy1 = new Joystick(0);
     
     public static void initialize(){
+        leftDrivetrain.configAllSettings(new LeftDriveConfiguration());
+
         leftSlave.follow(leftDrivetrain);
         rightSlave.follow(rightDrivetrain);
 
