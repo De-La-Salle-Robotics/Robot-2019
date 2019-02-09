@@ -46,11 +46,13 @@ public class Lidar {
     {
         /* NOTE: We don't keep track of overflows with this method */
         
-        int _endPointer = _portReference.getBytesReceived();
+        int newBytes = _portReference.getBytesReceived();
+        if(newBytes > BUFFER_SIZE) newBytes = BUFFER_SIZE;
         /* Create temporary buffer with serial values */
-        byte[] buf = _portReference.read(_endPointer);
+        byte[] buf = _portReference.read(newBytes);
         /* Fill local buffer with serial buffer */
-        System.arraycopy(buf, 0, _buf, 0, _endPointer);
+        System.arraycopy(buf, 0, _buf, _endPointer, newBytes);
+        _endPointer += newBytes;
     }
 
     /* Public method to update the distance and strength values */
@@ -67,7 +69,6 @@ public class Lidar {
         {
             tmpStart = _endPointer - 18;
         }
-        if(tmpStart < 0) tmpStart += BUFFER_SIZE;
 
         /* Move buffer pointer to the last point so we know we have latest data */
         while(_buf[tmpStart] != HEADER && _buf[tmpStart + 1] != HEADER)
@@ -97,6 +98,7 @@ public class Lidar {
             _distance = tmpDis;
             _strength = tmpStr;
         }
+        _endPointer = 0;
     }
 
 }

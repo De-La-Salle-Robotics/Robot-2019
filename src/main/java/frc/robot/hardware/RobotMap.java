@@ -12,9 +12,9 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class RobotMap{
     public static final TalonSRX leftDrivetrain = new TalonSRX(1);
-    public static final VictorSPX leftSlave = new VictorSPX(2);
-    public static final TalonSRX rightDrivetrain = new TalonSRX(3);
-    public static final VictorSPX rightSlave = new VictorSPX(4);
+    public static final VictorSPX leftSlave = new VictorSPX(1);
+    public static final TalonSRX rightDrivetrain = new TalonSRX(2);
+    public static final VictorSPX rightSlave = new VictorSPX(2);
     public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
     public static final Joystick joy1 = new Joystick(0);
     public static final Port lidarPort = Port.kUSB;
