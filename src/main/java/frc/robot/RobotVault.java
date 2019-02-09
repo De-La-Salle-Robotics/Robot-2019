@@ -10,8 +10,8 @@ public class RobotVault{
         RobotMap.initialize();
 
         drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain);
-
     }
+
     public void periodicTasks(){
         double throttle = -RobotMap.joy1.getRawAxis(1);
         double wheel = RobotMap.joy1.getRawAxis(2);
