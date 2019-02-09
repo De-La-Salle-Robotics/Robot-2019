@@ -19,7 +19,6 @@ public class Lidar {
 
     /* Variables to operate the Lidar faster */
     private byte[] _buf;
-    private int _startPointer;
     private int _endPointer;
 
     /* Variables we're concerned with */
@@ -33,15 +32,13 @@ public class Lidar {
     {
         _portReference = new SerialPort(BAUD_RATE, port, DATA_BITS, PARITY_BITS, STOP_BITS);
         _buf = new byte[BUFFER_SIZE];
-        _startPointer = 0;
         _endPointer = 0;
     }
 
     /* Local method used to get the size of the buffer */
     private int getBufSize()
     {
-        if(_endPointer < _startPointer) return _endPointer - _startPointer + BUFFER_SIZE;
-        return _endPointer - _startPointer;
+        return _endPointer;
     }
 
     /* Local method to fill buffer with serial port buffer */
@@ -49,19 +46,11 @@ public class Lidar {
     {
         /* NOTE: We don't keep track of overflows with this method */
         
-        int bytesReceived = _portReference.getBytesReceived();
+        int _endPointer = _portReference.getBytesReceived();
         /* Create temporary buffer with serial values */
-        byte[] buf = _portReference.read(bytesReceived);
+        byte[] buf = _portReference.read(_endPointer);
         /* Fill local buffer with serial buffer */
-        if(bytesReceived + _endPointer >= BUFFER_SIZE)
-        {
-            System.arraycopy(buf, 0, _buf, _endPointer, BUFFER_SIZE - _endPointer);
-            System.arraycopy(buf, BUFFER_SIZE - _endPointer, _buf, 0, bytesReceived - (BUFFER_SIZE - _endPointer));
-        }
-        else
-        {
-            System.arraycopy(buf, 0, _buf, _endPointer, bytesReceived);
-        }
+        System.arraycopy(buf, 0, _buf, 0, _endPointer);
     }
 
     /* Public method to update the distance and strength values */
@@ -73,7 +62,7 @@ public class Lidar {
         if(getBufSize() < 9) return;
 
         /* Create local variable to handle where we are in the buffer */
-        int tmpStart = _startPointer;
+        int tmpStart = 0;
         if(getBufSize() > 17)
         {
             tmpStart = _endPointer - 18;
@@ -84,7 +73,6 @@ public class Lidar {
         while(_buf[tmpStart] != HEADER && _buf[tmpStart + 1] != HEADER)
         {
             tmpStart++;
-            if(tmpStart == BUFFER_SIZE) tmpStart = 0;
         }
 
         /* Temporary variables in case checksum fails */
@@ -95,13 +83,13 @@ public class Lidar {
         for(int i = 0; i < 9; i++)
         {
             checksum += _buf[tmpStart];
-            tmpStart++;
-            if(tmpStart == BUFFER_SIZE) tmpStart = 0;
             if(i == 2) tmpDis = _buf[tmpStart];
             if(i == 3) tmpDis |= ((short)_buf[tmpStart] << 8);
             if(i == 4) tmpStr = _buf[tmpStart];
             if(i == 5) tmpStr |= ((short)_buf[tmpStart] << 8);
             if(i == 8) checksum -= (_buf[tmpStart] * 2);
+
+            tmpStart++;
         }
         /* If checksum works out, we can update public variables */
         if(checksum == 0)
@@ -109,8 +97,6 @@ public class Lidar {
             _distance = tmpDis;
             _strength = tmpStr;
         }
-        /* Essentially clear the buffer */
-        _startPointer = _endPointer;
     }
 
 }
