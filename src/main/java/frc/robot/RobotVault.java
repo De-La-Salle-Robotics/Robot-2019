@@ -9,20 +9,21 @@ import frc.robot.subsystem.*;
 public class RobotVault{
     private Drivetrain drivetrain;
     private Lidar lidar;
-    private Pixy2CCC pixyCam;
+    //private Pixy2CCC pixyCam;
 
     public RobotVault(){
         RobotMap.initialize();
 
         drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain);
+        
         lidar = new Lidar(RobotMap.lidarPort);
-        pixyCam = new Pixy2CCC(new PixyI2C(RobotMap.pixyI2C));
+        //pixyCam = new Pixy2CCC(new PixyI2C(RobotMap.pixyI2C));
     }
 
     public void periodicTasks(){
         /* First we call any methods that should get called once a loop */
         lidar.updateValues();
-        int blockNumber = pixyCam.parseBlocks();
+        //int blockNumber = pixyCam.parseBlocks();
 
         /* Then we get driver controller values */
         double throttle = -RobotMap.joy1.getRawAxis(1);
@@ -30,8 +31,8 @@ public class RobotVault{
 
         /* Then we print out anything important */
         System.out.println("Lidar distance is: " + lidar.getDistance());
-        if(blockNumber > 0) //If we have a block, print it
-            System.out.println("Pixy Block is: " + pixyCam.blocks[0].toString());
+        //if(blockNumber > 0) //If we have a block, print it
+        //    System.out.println("Pixy Block is: " + pixyCam.blocks[0].toString());
 
         /* Finally we run our subsystem tasks */
         drivetrain.arcadeDrive(throttle, wheel);
