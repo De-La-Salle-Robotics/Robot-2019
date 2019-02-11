@@ -3,10 +3,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 public class Drivetrain {
-    public VictorSPX leftside;
-    public VictorSPX rightside;
+    public TalonSRX leftside;
+    public TalonSRX rightside;
 
-    public Drivetrain(VictorSPX leftside, VictorSPX rightside){
+    public Drivetrain(TalonSRX leftside, TalonSRX rightside){
         this.leftside = leftside;
         this.rightside = rightside;
     }
