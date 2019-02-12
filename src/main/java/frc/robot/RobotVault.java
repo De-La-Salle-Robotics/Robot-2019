@@ -3,6 +3,7 @@ package frc.robot;
 import frc.robot.hardware.RobotMap;
 import frc.robot.subsystem.*; 
 import frc.robot.subsystem.Arm;
+import frc.robot.subsystem.HabLift;
 
 
 public class RobotVault{
@@ -10,6 +11,7 @@ public class RobotVault{
     private LED led;
     private Arm arm;
     private Claw claw;
+    private HabLift hablift;
 
     public RobotVault(){
         RobotMap.initialize();
@@ -18,6 +20,7 @@ public class RobotVault{
         led = new LED(RobotMap.can1);
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
+        hablift = new HabLift(RobotMap.liftMaster);
     }
 
     public void periodicTasks(){
@@ -29,10 +32,14 @@ public class RobotVault{
 
         boolean open = RobotMap.joy1.getRawButton(1);
         boolean close = RobotMap.joy1.getRawButton(3);
+        
+        boolean raise = RobotMap.joy1.getRawButton(5);
+        boolean lower = RobotMap.joy1.getRawButton(6);
 
         drivetrain.arcadeDrive(throttle, wheel);
         arm.armControl(up, down);
         claw.clawControl(close, open);
         led.lighting(.5, .5, 0);
+        hablift.liftControl(raise, lower);
     }
 }

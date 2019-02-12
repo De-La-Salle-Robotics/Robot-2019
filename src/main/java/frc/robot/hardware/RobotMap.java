@@ -16,6 +16,11 @@ public class RobotMap{
     public static final TalonSRX rightDrivetrain = new TalonSRX(2);
     public static final VictorSPX rightSlave = new VictorSPX(2);
 
+    public static final VictorSPX liftMaster = new VictorSPX(4);
+    public static final VictorSPX lift2 = new VictorSPX(5);
+    public static final VictorSPX lift3 = new VictorSPX(6);
+    public static final VictorSPX lift4 = new VictorSPX(7);
+
     public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
 
     public static final Joystick joy1 = new Joystick(0);
@@ -38,6 +43,14 @@ public class RobotMap{
         leftDrivetrain.setInverted(false);
         rightDrivetrain.setInverted(true);
 
-        arm.setInverted(false);
+        lift2.follow(liftMaster);
+        lift3.follow(liftMaster);
+        lift4.follow(liftMaster);
+
+        liftMaster.setInverted(false);
+        lift2.setInverted(InvertType.FollowMaster);
+        lift3.setInverted(InvertType.FollowMaster);
+        lift4.setInverted(InvertType.FollowMaster);
+
     }
 }
