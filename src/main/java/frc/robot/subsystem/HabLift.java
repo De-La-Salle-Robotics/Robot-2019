@@ -16,7 +16,7 @@ public class HabLift {
         } else if (lowerLift) {
             lift.set(ControlMode.PercentOutput, -1);
         } else {
-            lift.set(ControlMode.PercentOutput , 0);
+            lift.set(ControlMode.PercentOutput, 0);
 
         }
     }

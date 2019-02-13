@@ -56,7 +56,7 @@ public class RobotMap {
 
         /* Arm Initialization */
         arm.configAllSettings(armHelper);
-        
+
         armHelper.masterSetter();
 
         /* Lift Initialization */
