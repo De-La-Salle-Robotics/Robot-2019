@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Servo;
 import com.ctre.phoenix.CANifier;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 public class RobotMap {
     /* Drivetrain motor controllers */
@@ -33,13 +34,14 @@ public class RobotMap {
     /* Miscellaneous Items */
     public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
     public static final CANifier can1 = new CANifier(0);
+    public static final PigeonIMU pigeon = new PigeonIMU(0);
 
     /* Joysticks */
     public static final Joystick joy1 = new Joystick(0);
 
     /* Configuration helpers */
     public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);
-    public static final RightDriveConfiguration rightDriveHelper = new RightDriveConfiguration(rightDrivetrain);
+    public static final RightDriveConfiguration rightDriveHelper = new RightDriveConfiguration(rightDrivetrain, leftDrivetrain, pigeon);
     public static final ArmConfiguration armHelper = new ArmConfiguration(arm, can1);
     public static final LiftConfiguration liftHelper = new LiftConfiguration(liftMaster);
 

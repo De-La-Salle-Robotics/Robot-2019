@@ -27,7 +27,7 @@ public class BezierCurve
         double y = (n1 * _c1.y) + (n2 * _c2.y) + (n3 * _c3.y) + (n4 * _c4.y);
         return new Point(x, y);
     }
-    public Point getDerivative(double t)
+    private Point getDerivative(double t)
     {
         double n1 = 3 * Math.pow(1-t, 2);
         double n2 = 6 * Math.pow(1-t, 1) * Math.pow(t, 1);
@@ -49,11 +49,15 @@ public class BezierCurve
         return velocity / totalDerivative;
     }
 
-    public double getHeading(double currentT, double velocity)
+    public double getHeading(Point currentPoint, Point nextPoint)
     {
-        Point currentPoint = getPoint(currentT);
-        Point nextPoint = getPoint(currentT + getDeltaT(currentT, velocity));
         return Math.toDegrees(Math.atan2(nextPoint.y - currentPoint.y,
                                          nextPoint.x - currentPoint.x));
+    }
+
+    public double getDistance(Point currentPoint, Point nextPoint)
+    {
+        return Math.sqrt(Math.pow(currentPoint.x - nextPoint.x, 2) + 
+                         Math.pow(currentPoint.y - nextPoint.y, 2));
     }
 }
