@@ -1,24 +1,22 @@
 package frc.robot.hardware.configuration;
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.*;
 
-public class LeftDriveConfiguration extends TalonSRXConfiguration 
+public class LiftConfiguration extends VictorSPXConfiguration 
 {
     /* Reference to master device */
-    private TalonSRX masterReference;
+    private VictorSPX masterReference;
     /* Member variables for master device */
     private boolean setInvert = false;
 
-    public LeftDriveConfiguration(TalonSRX masterRef)
+    public LiftConfiguration(VictorSPX masterRef)
     {
         /* Set Default Configs */
         super();
 
         /* Set configs unique to this */
-        primaryPID.selectedFeedbackSensor = FeedbackDevice.QuadEncoder;
-        neutralDeadband = 0.001;
+        // Nothing special for this
 
         /* Set Reference */
         masterReference = masterRef;

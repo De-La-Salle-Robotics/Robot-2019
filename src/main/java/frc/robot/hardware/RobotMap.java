@@ -2,55 +2,69 @@ package frc.robot.hardware;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import frc.robot.hardware.configuration.ArmConfiguration;
 import frc.robot.hardware.configuration.LeftDriveConfiguration;
+import frc.robot.hardware.configuration.LiftConfiguration;
+import frc.robot.hardware.configuration.RightDriveConfiguration;
 import edu.wpi.first.wpilibj.Servo;
 
 import com.ctre.phoenix.CANifier;
-import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
-public class RobotMap{
+public class RobotMap {
+    /* Drivetrain motor controllers */
     public static final TalonSRX leftDrivetrain = new TalonSRX(1);
     public static final VictorSPX leftSlave = new VictorSPX(1);
     public static final TalonSRX rightDrivetrain = new TalonSRX(2);
     public static final VictorSPX rightSlave = new VictorSPX(2);
 
+    /* Arm motor controllers/servos */
+    public static final VictorSPX arm = new VictorSPX(3);
+    public static final Servo claw1 = new Servo(0);
+    public static final Servo claw2 = new Servo(1);
+
+    /* Lift motor controllers */
     public static final VictorSPX liftMaster = new VictorSPX(4);
     public static final VictorSPX lift2 = new VictorSPX(5);
     public static final VictorSPX lift3 = new VictorSPX(6);
     public static final VictorSPX lift4 = new VictorSPX(7);
 
+    /* Miscellaneous Items */
     public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
-
-    public static final Joystick joy1 = new Joystick(0);
-
     public static final CANifier can1 = new CANifier(0);
 
-    public static final VictorSPX arm = new VictorSPX(3);
-    public static final Servo claw1 = new Servo(0);
-    public static final Servo claw2 = new Servo(1);
-    
-    public static void initialize(){
-        leftDrivetrain.configAllSettings(new LeftDriveConfiguration());
+    /* Joysticks */
+    public static final Joystick joy1 = new Joystick(0);
 
-        leftSlave.follow(leftDrivetrain);
-        rightSlave.follow(rightDrivetrain);
+    /* Configuration helpers */
+    public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);
+    public static final RightDriveConfiguration rightDriveHelper = new RightDriveConfiguration(rightDrivetrain);
+    public static final ArmConfiguration armHelper = new ArmConfiguration(arm, can1);
+    public static final LiftConfiguration liftHelper = new LiftConfiguration(liftMaster);
 
-        leftSlave.setInverted(InvertType.FollowMaster);
-        rightSlave.setInverted(InvertType.FollowMaster);
+    public static void initialize() {
+        /* Drivetrain Initialization */
+        leftDrivetrain.configAllSettings(leftDriveHelper);
+        rightDrivetrain.configAllSettings(rightDriveHelper);
 
-        leftDrivetrain.setInverted(false);
-        rightDrivetrain.setInverted(true);
+        leftDriveHelper.masterSetter();
+        rightDriveHelper.masterSetter();
 
-        lift2.follow(liftMaster);
-        lift3.follow(liftMaster);
-        lift4.follow(liftMaster);
+        leftDriveHelper.slaveSetter(leftSlave);
+        rightDriveHelper.slaveSetter(rightSlave);
 
-        liftMaster.setInverted(false);
-        lift2.setInverted(InvertType.FollowMaster);
-        lift3.setInverted(InvertType.FollowMaster);
-        lift4.setInverted(InvertType.FollowMaster);
+        /* Arm Initialization */
+        arm.configAllSettings(armHelper);
+        
+        armHelper.masterSetter();
 
+        /* Lift Initialization */
+        liftMaster.configAllSettings(liftHelper);
+
+        liftHelper.masterSetter();
+        liftHelper.slaveSetter(lift2);
+        liftHelper.slaveSetter(lift3);
+        liftHelper.slaveSetter(lift4);
     }
 }
