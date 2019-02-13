@@ -33,4 +33,8 @@ public class LeftDriveConfiguration extends TalonSRXConfiguration {
         slaveReference.follow(masterReference);
         slaveReference.setInverted(InvertType.FollowMaster);
     }
+
+    public boolean masterReset() {
+        return masterReference.hasResetOccurred();
+    }
 }

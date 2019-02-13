@@ -12,6 +12,8 @@ public class RobotVault {
     private Claw claw;
     private HabLift hablift;
 
+    private DeviceChecker deviceChecker;
+
     public RobotVault() {
         RobotMap.initialize();
 
@@ -20,6 +22,9 @@ public class RobotVault {
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
+
+        deviceChecker = new DeviceChecker(RobotMap.liftHelper, RobotMap.armHelper, 
+            RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
     }
 
     public void periodicTasks() {
@@ -40,5 +45,7 @@ public class RobotVault {
         claw.clawControl(close, open);
         led.lighting(.5, .5, 0);
         hablift.liftControl(raise, lower);
+
+        deviceChecker.checkForResets();
     }
 }

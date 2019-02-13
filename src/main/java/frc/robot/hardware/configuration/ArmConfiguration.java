@@ -28,4 +28,8 @@ public class ArmConfiguration extends VictorSPXConfiguration {
     public void masterSetter() {
         masterReference.setInverted(setInvert);
     }
+
+    public boolean masterReset() {
+        return masterReference.hasResetOccurred();
+    }
 }
