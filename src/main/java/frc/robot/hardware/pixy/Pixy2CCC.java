@@ -40,16 +40,16 @@ public class Pixy2CCC
     // For example if you're only interested in receiving blocks
     // with signatures 1 and fiVe, you could use a sigmap of 
     // PIXY_SIG1 | PIXY_SIG5
-    public final byte CCC_SIG1 = 1;
-    public final byte CCC_SIG2 = 2;
-    public final byte CCC_SIG3 = 4;
-    public final byte CCC_SIG4 = 8;
-    public final byte CCC_SIG5 = 16;
-    public final byte CCC_SIG6 = 32;
-    public final byte CCC_SIG7 = 64;
-    public final byte CCC_COLOR_CODES = (byte)128;
+    public static final byte CCC_SIG1 = 1;
+    public static final byte CCC_SIG2 = 2;
+    public static final byte CCC_SIG3 = 4;
+    public static final byte CCC_SIG4 = 8;
+    public static final byte CCC_SIG5 = 16;
+    public static final byte CCC_SIG6 = 32;
+    public static final byte CCC_SIG7 = 64;
+    public static final byte CCC_COLOR_CODES = (byte)128;
 
-    private final byte CCC_SIG_ALL = (byte)0xff; // all bits or'ed together
+    public static final byte CCC_SIG_ALL = (byte)0xff; // all bits or'ed together
 
     public class Block
     {
