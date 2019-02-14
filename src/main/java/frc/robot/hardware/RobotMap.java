@@ -1,7 +1,9 @@
 package frc.robot.hardware;
 
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 import frc.robot.hardware.configuration.ArmConfiguration;
 import frc.robot.hardware.configuration.LeftDriveConfiguration;
 import frc.robot.hardware.configuration.LiftConfiguration;
@@ -38,6 +40,10 @@ public class RobotMap {
 
     /* Joysticks */
     public static final Joystick joy1 = new Joystick(0);
+
+    /* External devices */
+    public static final Port lidarPort = Port.kUSB;
+    public static final I2C.Port pixyI2C =I2C.Port.kMXP;
 
     /* Configuration helpers */
     public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);

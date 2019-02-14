@@ -1,6 +1,9 @@
 package frc.robot;
 
 import frc.robot.hardware.RobotMap;
+import frc.robot.hardware.lidar.Lidar;
+import frc.robot.hardware.pixy.Pixy2CCC;
+import frc.robot.hardware.pixy.PixyI2C;
 import frc.robot.subsystem.*;
 import frc.robot.subsystem.Arm;
 import frc.robot.subsystem.HabLift;
@@ -11,6 +14,7 @@ public class RobotVault {
     private Arm arm;
     private Claw claw;
     private HabLift hablift;
+    private Pixy2CCC pixyCam;
 
     private DeviceChecker deviceChecker;
 
@@ -22,12 +26,15 @@ public class RobotVault {
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
+        pixyCam = new Pixy2CCC(new PixyI2C(RobotMap.pixyI2C));
 
         deviceChecker = new DeviceChecker(RobotMap.liftHelper, RobotMap.armHelper, 
             RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
     }
 
     public void periodicTasks() {
+        pixyCam.parseBlocks();
+
         double throttle = -RobotMap.joy1.getRawAxis(1);
         double wheel = RobotMap.joy1.getRawAxis(2);
 
