@@ -1,8 +1,6 @@
 package frc.robot;
 
 import frc.robot.hardware.RobotMap;
-import frc.robot.hardware.pixy.Pixy2CCC;
-import frc.robot.hardware.pixy.PixyI2C;
 import frc.robot.subsystem.*;
 import frc.robot.subsystem.Arm;
 import frc.robot.subsystem.HabLift;
@@ -13,7 +11,6 @@ public class RobotVault {
     private Arm arm;
     private Claw claw;
     private HabLift hablift;
-    private Pixy2CCC pixyCam;
     private CameraLocalization cameraLocalization;
 
     private DeviceChecker deviceChecker;
@@ -25,8 +22,7 @@ public class RobotVault {
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
-        pixyCam = new Pixy2CCC(new PixyI2C(RobotMap.pixyI2C));
-        cameraLocalization = new CameraLocalization(pixyCam);
+        cameraLocalization = new CameraLocalization(RobotMap.pixyCam);
         /* Drivetrain depends on previous instantiations */
         drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization);
 
@@ -55,6 +51,10 @@ public class RobotVault {
         claw.clawControl(close, open);
         led.lighting(.5, .5, 0);
         hablift.liftControl(raise, lower);
+
+        int x = RobotMap.pixyCam.getBlockX(0);
+        if(x > 0)
+            System.out.println(x);
 
         deviceChecker.checkForResets();
     }

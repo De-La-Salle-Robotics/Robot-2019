@@ -1,13 +1,12 @@
 package frc.robot.subsystem;
 
-import frc.robot.hardware.pixy.Pixy2CCC;
+import frc.robot.jni.Pixy2USBJNI;
 
 public class CameraLocalization {
     private final int PIXYCAM_MIDDLE = 300;
     private final double PIXELS_TO_DEGREES = 0.1;
 
-    private byte SIGNAL_MAP = Pixy2CCC.CCC_SIG1;
-    private Pixy2CCC pixyRef;
+    private Pixy2USBJNI pixyRef;
 
     private double SEPERATION_COEFFICIENT = 1.0;
     
@@ -15,24 +14,22 @@ public class CameraLocalization {
     private double targetAngle;
     private boolean distanceIsValid;
 
-    public CameraLocalization(Pixy2CCC pixyRef) {
+    public CameraLocalization(Pixy2USBJNI pixyRef) {
         this.pixyRef = pixyRef;
         distanceFromTarget = 0;
         distanceIsValid = false;
     }
 
     public void onLoop() {
-        pixyRef.parseBlocks(SIGNAL_MAP);
-        Pixy2CCC.Block[] blocks = pixyRef.blocks;
-        if(pixyRef.numBlocks > 1) {
+        int l1 = pixyRef.getBlockX(0);
+        int l2 = pixyRef.getBlockX(1);
+        if(l1 >= 0 && l2 >= 0) {
             /* We have at least 2 blocks, that means we can calculate distance */
             distanceIsValid = true;
 
             /* Currently just assume the next two blocks */
-            int center0 = blocks[0].m_x + (blocks[0].m_width / 2);
-            int center1 = blocks[1].m_x + (blocks[1].m_width / 2);
-            int seperation = Math.abs(center1 - center0);
-            int middleOfTarget = (center0 + center1) / 2;
+            int seperation = Math.abs(l2 - l1);
+            int middleOfTarget = (l1 + l2) / 2;
 
             targetAngle = (middleOfTarget - PIXYCAM_MIDDLE) * PIXELS_TO_DEGREES;
 

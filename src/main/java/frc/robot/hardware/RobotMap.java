@@ -8,6 +8,7 @@ import frc.robot.hardware.configuration.ArmConfiguration;
 import frc.robot.hardware.configuration.LeftDriveConfiguration;
 import frc.robot.hardware.configuration.LiftConfiguration;
 import frc.robot.hardware.configuration.RightDriveConfiguration;
+import frc.robot.jni.Pixy2USBJNI;
 import edu.wpi.first.wpilibj.Servo;
 
 import com.ctre.phoenix.CANifier;
@@ -43,7 +44,7 @@ public class RobotMap {
 
     /* External devices */
     public static final Port lidarPort = Port.kUSB;
-    public static final I2C.Port pixyI2C =I2C.Port.kMXP;
+    public static final Pixy2USBJNI pixyCam = new Pixy2USBJNI();
 
     /* Configuration helpers */
     public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);
