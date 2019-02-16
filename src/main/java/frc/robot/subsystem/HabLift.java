@@ -12,9 +12,9 @@ public class HabLift {
 
     public void liftControl(boolean raiseLift, boolean lowerLift) {
         if (raiseLift) {
-            lift.set(ControlMode.PercentOutput, 1);
+            lift.set(ControlMode.PercentOutput, 0.5);
         } else if (lowerLift) {
-            lift.set(ControlMode.PercentOutput, -1);
+            lift.set(ControlMode.PercentOutput, -0.5);
         } else {
             lift.set(ControlMode.PercentOutput, 0);
 

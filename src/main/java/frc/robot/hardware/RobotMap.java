@@ -75,5 +75,6 @@ public class RobotMap {
         liftHelper.slaveSetter(lift2);
         liftHelper.slaveSetter(lift3);
         liftHelper.slaveSetter(lift4);
+        lift4.setInverted(true);
     }
 }

@@ -114,7 +114,10 @@ public class Drivetrain {
     public void assistDrive(double throttle) {
         /* If no valid curve to follow, just drive forward */
         if (curve == null)
+        {
             arcadeDrive(throttle, 0);
+            return;
+        }
 
         double nextT = curve.getDeltaT(currentT, throttle);
         Point currentPoint = curve.getPoint(currentT);

@@ -18,7 +18,7 @@ public class RobotVault {
     public RobotVault() {
         RobotMap.initialize();
 
-        led = new LED(RobotMap.can1);
+        //led = new LED(RobotMap.can1);
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
@@ -49,12 +49,8 @@ public class RobotVault {
         drivetrain.driveControl(throttle, wheel, driverAssist);
         arm.armControl(up, down);
         claw.clawControl(close, open);
-        led.lighting(.5, .5, 0);
+        //led.lighting(.5, .5, 0);
         hablift.liftControl(raise, lower);
-
-        int x = RobotMap.pixyCam.getBlockX(0);
-        if(x > 0)
-            System.out.println(x);
 
         deviceChecker.checkForResets();
     }
