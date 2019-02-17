@@ -3,12 +3,12 @@ package frc.robot.subsystem;
 import frc.robot.jni.Pixy2USBJNI;
 
 public class CameraLocalization {
-    private final int PIXYCAM_MIDDLE = 300;
-    private final double PIXELS_TO_DEGREES = 0.1;
+    private final int PIXYCAM_MIDDLE = 180;
+    private final double PIXELS_TO_DEGREES = -0.4177707692307692;
 
     private Pixy2USBJNI pixyRef;
 
-    private double SEPERATION_COEFFICIENT = 1.0;
+    private double SEPERATION_COEFFICIENT = 2900.;
     
     private double distanceFromTarget;
     private double targetAngle;
@@ -53,6 +53,6 @@ public class CameraLocalization {
     }
 
     private double calculateDistanceFromSeperation(int seperation) {
-        return SEPERATION_COEFFICIENT * (1 / seperation);
+        return SEPERATION_COEFFICIENT * (1.0 / (double)seperation);
     }
 }

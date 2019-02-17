@@ -102,7 +102,7 @@ JNIEXPORT jint JNICALL Java_frc_robot_jni_Pixy2USBJNI_getX
    int num = pixy.ccc.getBlocks(false, CCC_SIG1, 0xff);
    if(num > index)
    {
-      return pixy.ccc.blocks[index].m_x;
+      return pixy.ccc.blocks[index].m_x + (pixy.ccc.blocks[index].m_width / 2);
    }   
    return -1;
 }

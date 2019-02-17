@@ -24,8 +24,8 @@ public class Localization
                                       double dist, 
                                       double targetHeading)
     {
-        double b = dist * Math.sin(Math.toRadians(robotHeading + targetHeading));
-        double a = b * Math.tan(Math.toRadians(robotHeading + targetHeading));
+        double b = dist * Math.cos(Math.toRadians(targetHeading));
+        double a = dist * Math.sin(Math.toRadians(targetHeading));
         specifiedPoint = new Point(a, b);
 
         /* This will probably change as we figure out how to better localize */

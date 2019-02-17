@@ -51,8 +51,8 @@ public class BezierCurve
 
     public double getHeading(Point currentPoint, Point nextPoint)
     {
-        return Math.toDegrees(Math.atan2(nextPoint.y - currentPoint.y,
-                                         nextPoint.x - currentPoint.x));
+        return Math.toDegrees(Math.atan2(nextPoint.x - currentPoint.x,
+                                         nextPoint.y - currentPoint.y));
     }
 
     public double getDistance(Point currentPoint, Point nextPoint)

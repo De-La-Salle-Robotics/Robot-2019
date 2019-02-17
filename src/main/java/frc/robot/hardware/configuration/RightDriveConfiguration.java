@@ -11,7 +11,7 @@ public class RightDriveConfiguration extends TalonSRXConfiguration {
     private TalonSRX masterReference;
     /* Member variables for master device */
     private boolean setInvert = true;
-    private boolean sensorPhase = false;
+    private boolean sensorPhase = true;
 
     public RightDriveConfiguration(TalonSRX masterRef, TalonSRX leftTalon, PigeonIMU pigeon) {
         /* Set Default Configs */
@@ -28,8 +28,14 @@ public class RightDriveConfiguration extends TalonSRXConfiguration {
         remoteFilter1.remoteSensorSource = RemoteSensorSource.Pigeon_Yaw;
 
         /* Slot 0 gains */
+        slot0.kP = 0.5;
+        slot0.kI = 0.0;
+        slot0.kD = 20.0;
 
         /* Slot 1 gains */
+        slot1.kP = 1.0;
+        slot1.kI = 0.0;
+        slot1.kD = 10.0;
 
         neutralDeadband = 0.001;
 

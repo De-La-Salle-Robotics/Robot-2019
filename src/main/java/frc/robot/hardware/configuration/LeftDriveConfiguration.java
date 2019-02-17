@@ -9,7 +9,7 @@ public class LeftDriveConfiguration extends TalonSRXConfiguration {
     private TalonSRX masterReference;
     /* Member variables for master device */
     private boolean setInvert = false;
-    private boolean sensorPhase = false;
+    private boolean sensorPhase = true;
 
     public LeftDriveConfiguration(TalonSRX masterRef) {
         /* Set Default Configs */
