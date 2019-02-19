@@ -3,8 +3,8 @@ package frc.robot.subsystem;
 import frc.robot.jni.Pixy2USBJNI;
 
 public class CameraLocalization {
-    private final int PIXYCAM_MIDDLE = 180;
-    private final double PIXELS_TO_DEGREES = -0.4177707692307692;
+    private final int PIXYCAM_MIDDLE = 178;
+    private final double PIXELS_TO_DEGREES = -0.5;
 
     private Pixy2USBJNI pixyRef;
 
