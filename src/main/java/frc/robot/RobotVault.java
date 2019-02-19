@@ -18,13 +18,13 @@ public class RobotVault {
     public RobotVault() {
         RobotMap.initialize();
 
-        //led = new LED(RobotMap.can1);
+        led = new LED(RobotMap.can1);
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
         cameraLocalization = new CameraLocalization(RobotMap.pixyCam);
         /* Drivetrain depends on previous instantiations */
-        drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization);
+        drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization , led);
 
         deviceChecker = new DeviceChecker(RobotMap.liftHelper, RobotMap.armHelper, 
             RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
@@ -49,8 +49,7 @@ public class RobotVault {
         drivetrain.driveControl(throttle, wheel, driverAssist);
         arm.armControl(up, down);
         claw.clawControl(close, open);
-        //led.lighting(.5, .5, 0);
-        hablift.liftControl(raise, lower);
+        hablift.liftControl(raise, lower);    
 
         if(RobotMap.joy1.getRawButton(1))
         {

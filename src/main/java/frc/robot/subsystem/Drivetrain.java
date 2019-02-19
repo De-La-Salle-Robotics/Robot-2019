@@ -36,11 +36,14 @@ public class Drivetrain {
 
     private double currentT;
 
-    public Drivetrain(TalonSRX leftside, TalonSRX rightside, PigeonIMU pigeon, CameraLocalization cameraLocalization) {
+    private LED led;
+
+    public Drivetrain(TalonSRX leftside, TalonSRX rightside, PigeonIMU pigeon, CameraLocalization cameraLocalization , LED led) {
         this.leftside = leftside;
         this.rightside = rightside;
         this.pigeon = pigeon;
         this.cameraLocalization = cameraLocalization;
+        this.led = led;
 
         ableToDriverAssist = false;
         timeOfLastCurveUpdate = 0;
@@ -63,6 +66,7 @@ public class Drivetrain {
         /* First determine if we can assist driver from distanceFromTarget */
         if(true)
             if(distanceFromTarget > 0) {
+                led.lighting(.425 , .115 , .0025);
                 /* Data is valid, let's set the flag so we can assist driver */
                 ableToDriverAssist = true;
                 timeSinceLastGood = System.currentTimeMillis();
@@ -79,7 +83,9 @@ public class Drivetrain {
             } else if(System.currentTimeMillis() - timeSinceLastGood > TIME_FOR_NO_CURVE) {
                 /* It's been too long since we got valid data, clear the flag */
                 ableToDriverAssist = false;
+                led.lighting(.431, .258, .956);
             }
+        
 
         /* Then we determine if the driver wants the driver assistance */
         if (driverAssist) {
