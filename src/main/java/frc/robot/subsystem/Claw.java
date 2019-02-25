@@ -8,8 +8,8 @@ public class Claw {
 
     final int kAngleMax1 = 120;
     final int kAngleMax2 = 120;
-    final int kAngleMin1 = 40;
-    final int kAngleMin2 = 40;
+    final int kAngleMin1 = 25;
+    final int kAngleMin2 = 25;
 
     public Claw(Servo servo1, Servo servo2) {
         this.servo1 = servo1;

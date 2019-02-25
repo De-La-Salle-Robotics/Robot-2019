@@ -11,10 +11,10 @@ public class LED {
         this.ledController = ledController;
     }
 
-    public void lighting(double red, double blue, double green) {
+    public void lighting(double red, double green, double blue) {
         ledController.setLEDOutput(red, LEDChannel.LEDChannelB);
-        ledController.setLEDOutput(blue, LEDChannel.LEDChannelC);
-        ledController.setLEDOutput(green, LEDChannel.LEDChannelA);
+        ledController.setLEDOutput(blue, LEDChannel.LEDChannelA);
+        ledController.setLEDOutput(green, LEDChannel.LEDChannelC);
     }
 
 }

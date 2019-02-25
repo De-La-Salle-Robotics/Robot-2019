@@ -24,7 +24,7 @@ public class RobotVault {
         hablift = new HabLift(RobotMap.liftMaster);
         cameraLocalization = new CameraLocalization(RobotMap.pixyCam);
         /* Drivetrain depends on previous instantiations */
-        drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization);
+        drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization , led);
 
         deviceChecker = new DeviceChecker(RobotMap.liftHelper, RobotMap.armHelper, 
             RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
@@ -35,27 +35,29 @@ public class RobotVault {
 
         double throttle = -RobotMap.joy1.getRawAxis(1);
         double wheel = RobotMap.joy1.getRawAxis(2);
-        boolean driverAssist = false;//RobotMap.joy1.getRawButton(6);
+        boolean driverAssist = RobotMap.joy1.getRawButton(6);
 
-        boolean up = RobotMap.joy1.getRawButton(4);
-        boolean down = RobotMap.joy1.getRawButton(2);
+        boolean up = RobotMap.joy2.getRawButton(4);
+        boolean down = RobotMap.joy2.getRawButton(1);
 
-        boolean open = RobotMap.joy1.getRawButton(1);
-        boolean close = RobotMap.joy1.getRawButton(3);
+        boolean open = RobotMap.joy2.getRawButton(2);
+        boolean close = RobotMap.joy2.getRawButton(3);
 
-        boolean raise = RobotMap.joy1.getRawButton(5);
-        boolean lower = RobotMap.joy1.getRawButton(6);
+        boolean raise = RobotMap.joy2.getRawButton(5);
+        boolean lower = RobotMap.joy2.getRawButton(6);
 
         drivetrain.driveControl(throttle, wheel, driverAssist);
         arm.armControl(up, down);
         claw.clawControl(close, open);
-        led.lighting(.5, .5, 0);
-        hablift.liftControl(raise, lower);
+        hablift.liftControl(raise, lower);    
 
-        int x = RobotMap.pixyCam.getBlockX(0);
-        if(x > 0)
-            System.out.println(x);
-
+        if(RobotMap.joy1.getRawButton(1))
+        {
+            RobotMap.pigeon.setYaw(0);
+            RobotMap.leftDrivetrain.getSensorCollection().setQuadraturePosition(0,0);
+            RobotMap.rightDrivetrain.getSensorCollection().setQuadraturePosition(0,0);
+        }
+        
         deviceChecker.checkForResets();
     }
 }

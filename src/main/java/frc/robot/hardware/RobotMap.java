@@ -41,6 +41,7 @@ public class RobotMap {
 
     /* Joysticks */
     public static final Joystick joy1 = new Joystick(0);
+    public static final Joystick joy2 = new Joystick(1);
 
     /* External devices */
     public static final Port lidarPort = Port.kUSB;
@@ -75,5 +76,9 @@ public class RobotMap {
         liftHelper.slaveSetter(lift2);
         liftHelper.slaveSetter(lift3);
         liftHelper.slaveSetter(lift4);
+        lift4.setInverted(true);
+        lift2.setInverted(false);
+        liftMaster.setInverted(false);
+        lift3.setInverted(true);
     }
 }
