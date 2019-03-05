@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.crypto.Data;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -65,14 +67,6 @@ import org.opencv.core.Point;
  */
 
 public final class Main {
-	private static double MAX_CAMERA_VALUE = 320;
-	private static double DISTANCE_COEFFICIENT = 3092;
-	private static double PIXEL_DEGREE_COEFFICIENT = 0.1720141821143758644330723260584;
-
-	
-	private static NetworkTableEntry distanceEntry;
-	private static NetworkTableEntry angleEntry;
-	private static NetworkTableEntry validDataEntry;
 
 
 	private static String configFile = "/boot/frc.json";
@@ -231,9 +225,9 @@ public final class Main {
 			ntinst.startClientTeam(team);
 		}
 
-		distanceEntry = ntinst.getEntry("DistanceEntry");
-		angleEntry = ntinst.getEntry("AngleEntry");
-		validDataEntry = ntinst.getEntry("ValidDataEntry");
+		UsefulStuff.distanceEntry = ntinst.getEntry("DistanceEntry");
+		UsefulStuff.angleEntry = ntinst.getEntry("AngleEntry");
+		UsefulStuff.validDataEntry = ntinst.getEntry("ValidDataEntry");
 
 		// start cameras
 		List<VideoSource> cameras = new ArrayList<>();
@@ -249,7 +243,7 @@ public final class Main {
 				// do something with pipeline results
 				ArrayList<MatOfPoint> arr = ballPipe.filterContoursOutput();
 
-				validDataEntry.setBoolean(calculateDistAndAngle(arr));
+				UsefulStuff.validDataEntry.setBoolean(UsefulStuff.calculateDistAndAngle(arr));
 
 			});
 			/*
@@ -257,6 +251,9 @@ public final class Main {
 			 * VisionThread(cameras.get(0), new GripPipeline(), pipeline -> { ... });
 			 */
 			visionThread.start();
+
+			Thread udpConnectionThread = new Thread(new UsefulStuff());
+			udpConnectionThread.start();
 		}
 
 		// loop forever
@@ -269,41 +266,4 @@ public final class Main {
 		}
 	}
 
-	private static boolean calculateDistAndAngle(ArrayList<MatOfPoint> contours)
-	{
-		if(contours.size() < 2) return false; //Return if there isn't at least 2 contours
-
-		double mid1 = getMiddleOfMat(contours.get(0));
-		double mid2 = getMiddleOfMat(contours.get(1));
-
-		double seperation = Math.abs(mid1 - mid2);
-		double distance = DISTANCE_COEFFICIENT / seperation;
-		
-		double direction = ((mid1 + mid2) / 2) - (MAX_CAMERA_VALUE / 2);
-		double angle = direction * PIXEL_DEGREE_COEFFICIENT;
-
-		distanceEntry.setDouble(distance);
-		angleEntry.setDouble(angle);
-
-		System.out.println("Distance is: " + distance + "\tAngle is: " + angle);
-		System.out.println();
-
-		return true;
-	}
-
-	private static double getMiddleOfMat(MatOfPoint mat)
-	{
-		double smallest = 10000;
-		double largest = 0;
-
-		Point[] array = mat.toArray();
-
-		for(Point p : array)
-		{
-			if(p.x < smallest) smallest = p.x;
-			if(p.x > largest) largest = p.x;
-		}
-
-		return (smallest + largest) / 2;
-	}
 }
