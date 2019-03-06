@@ -172,9 +172,6 @@ public class UsefulStuff implements Runnable {
             sendUdpData(dat);
         }
 
-		System.out.println("Distance is: " + distance + "\tAngle is: " + angle);
-		System.out.println();
-
 		return true;
 	}
 

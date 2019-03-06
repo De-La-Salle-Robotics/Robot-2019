@@ -35,10 +35,12 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.lblRioAddress = new System.Windows.Forms.Label();
+            this.lblCamPort = new System.Windows.Forms.Label();
+            this.lblRaspPiAddress = new System.Windows.Forms.Label();
             this.lblTargetAngle = new System.Windows.Forms.Label();
             this.lblTargetDistance = new System.Windows.Forms.Label();
             this.chrtBezierDisplay = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.lblRaspPiAddress = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -71,6 +73,8 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.lblRioAddress);
+            this.splitContainer1.Panel1.Controls.Add(this.lblCamPort);
             this.splitContainer1.Panel1.Controls.Add(this.lblRaspPiAddress);
             this.splitContainer1.Panel1.Controls.Add(this.lblTargetAngle);
             this.splitContainer1.Panel1.Controls.Add(this.lblTargetDistance);
@@ -82,6 +86,33 @@
             this.splitContainer1.Size = new System.Drawing.Size(1143, 547);
             this.splitContainer1.SplitterDistance = 871;
             this.splitContainer1.TabIndex = 2;
+            // 
+            // lblRioAddress
+            // 
+            this.lblRioAddress.AutoSize = true;
+            this.lblRioAddress.Location = new System.Drawing.Point(6, 52);
+            this.lblRioAddress.Name = "lblRioAddress";
+            this.lblRioAddress.Size = new System.Drawing.Size(99, 13);
+            this.lblRioAddress.TabIndex = 5;
+            this.lblRioAddress.Text = "RoboRIO Address: ";
+            // 
+            // lblCamPort
+            // 
+            this.lblCamPort.AutoSize = true;
+            this.lblCamPort.Location = new System.Drawing.Point(182, 68);
+            this.lblCamPort.Name = "lblCamPort";
+            this.lblCamPort.Size = new System.Drawing.Size(71, 13);
+            this.lblCamPort.TabIndex = 4;
+            this.lblCamPort.Text = "Camera Port: ";
+            // 
+            // lblRaspPiAddress
+            // 
+            this.lblRaspPiAddress.AutoSize = true;
+            this.lblRaspPiAddress.Location = new System.Drawing.Point(3, 68);
+            this.lblRaspPiAddress.Name = "lblRaspPiAddress";
+            this.lblRaspPiAddress.Size = new System.Drawing.Size(114, 13);
+            this.lblRaspPiAddress.TabIndex = 3;
+            this.lblRaspPiAddress.Text = "Raspberry Pi Address: ";
             // 
             // lblTargetAngle
             // 
@@ -119,15 +150,6 @@
             this.chrtBezierDisplay.TabIndex = 0;
             this.chrtBezierDisplay.Text = "chart1";
             // 
-            // lblRaspPiAddress
-            // 
-            this.lblRaspPiAddress.AutoSize = true;
-            this.lblRaspPiAddress.Location = new System.Drawing.Point(3, 68);
-            this.lblRaspPiAddress.Name = "lblRaspPiAddress";
-            this.lblRaspPiAddress.Size = new System.Drawing.Size(114, 13);
-            this.lblRaspPiAddress.TabIndex = 3;
-            this.lblRaspPiAddress.Text = "Raspberry Pi Address: ";
-            // 
             // FRCDashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -159,6 +181,8 @@
         private System.Windows.Forms.Label lblTargetAngle;
         private System.Windows.Forms.Label lblTargetDistance;
         private System.Windows.Forms.Label lblRaspPiAddress;
+        private System.Windows.Forms.Label lblCamPort;
+        private System.Windows.Forms.Label lblRioAddress;
     }
 }
 

@@ -15,13 +15,13 @@
       </grip:Input>
       <grip:Input step="0" socket="2">
         <value>
-          <double>82.55395683453237</double>
+          <double>29.81115107913669</double>
           <double>255.0</double>
         </value>
       </grip:Input>
       <grip:Input step="0" socket="3">
         <value>
-          <double>139.88309352517985</double>
+          <double>98.60611510791365</double>
           <double>255.0</double>
         </value>
       </grip:Input>

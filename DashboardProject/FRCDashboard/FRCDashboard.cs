@@ -24,12 +24,22 @@ namespace FRCDashboard
 
         private UdpClient raspberryPiClient;
         private IPAddress piAddress;
-        private bool establishedConnection;
+        private bool establishedConnectionWithPi;
         private IPEndPoint piEndPoint;
+        private int piPort = 5800;
+        private byte[] piBuf = new byte[256];
+        private object piLockObject = new object();
+
+        private UdpClient rioClient;
+        private IPAddress rioAddress;
+        private bool establishedConnectionWithRio;
+        private IPEndPoint rioEndPoint;
+        private int rioPort = 5801;
+        private byte[] rioBuf = new byte[256];
+        private object rioLockObject = new object();
+
         private bool runThreads = true;
 
-        private byte[] buf = new byte[256];
-        private bool gettingData = false;
 
         public FRCDashboard()
         {
@@ -38,26 +48,53 @@ namespace FRCDashboard
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            piAddress = Dns.GetHostAddresses("frcvision.local")[0];
-            lblRaspPiAddress.Text = "Raspberry Pi Address: " + piAddress.ToString();
-            raspberryPiClient = new UdpClient();
-            raspberryPiClient.Client.SendTimeout = 10;
-            raspberryPiClient.Client.ReceiveTimeout = 10; /* Very short timeouts to make sure we get the latest data quickly */
-            establishedConnection = false;
-            piEndPoint = new IPEndPoint(IPAddress.Any, 5800);
+            try
+            {
+                piAddress = Dns.GetHostAddresses("frcvision.local")[0];
+                lblRaspPiAddress.Text = "Raspberry Pi Address: " + piAddress.ToString();
+                raspberryPiClient = new UdpClient();
+                raspberryPiClient.Client.SendTimeout = 100;
+                raspberryPiClient.Client.ReceiveTimeout = 100;
+                raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
+                establishedConnectionWithPi = false;
+                piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
+
+                new System.Threading.Thread(PiConnectThread).Start();
+            }
+            catch
+            {
+                lblRaspPiAddress.Text = "Raspberry Pi Address: Could not resolve Pi DNS";
+            }
+            
+            try
+            {
+                rioAddress = Dns.GetHostAddresses("roborio-7762-frc.local")[0];
+                lblRioAddress.Text = "RoboRIO Address: " + rioAddress.ToString();
+                rioClient = new UdpClient();
+                rioClient.Client.SendTimeout = 100;
+                rioClient.Client.ReceiveTimeout = 100;
+                rioClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
+                establishedConnectionWithRio = false;
+                rioEndPoint = new IPEndPoint(IPAddress.Any, rioPort);
+
+                new System.Threading.Thread(RioConnectThread).Start();
+            }
+            catch
+            {
+                lblRioAddress.Text = "RoboRIO Address: Could not resolve Rio DNS";
+            }
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
-            new System.Threading.Thread(ConnectThread).Start();
         }
 
-        private void ConnectThread()
+        private void PiConnectThread()
         {
-            while (!establishedConnection && raspberryPiClient != null && runThreads)
+            while (!establishedConnectionWithPi && raspberryPiClient != null && runThreads)
             {
                 try
                 {
-                    raspberryPiClient.Connect(piAddress, 5800);
+                    raspberryPiClient.Connect(piAddress, piPort);
                     raspberryPiClient.Send(new byte[] { 0x33 }, 1);
                     byte[] ret = raspberryPiClient.Receive(ref piEndPoint);
                     if (ret[0] == 0x77 && ret[1] == 0x62)
@@ -67,12 +104,64 @@ namespace FRCDashboard
                         stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
                         stream.Start();
 
-                        establishedConnection = true;
+                        establishedConnectionWithPi = true;
+                        new System.Threading.Thread(UpdatePiBuf).Start();
                     }
                 }
                 catch { }
             }
         }
+        private void UpdatePiBuf()
+        {
+            while (runThreads)
+            {
+                lock (piLockObject)
+                {
+                    try
+                    {
+                        piBuf = raspberryPiClient.Receive(ref piEndPoint);
+                    }
+                    catch { }
+                }
+                System.Threading.Thread.Sleep(100);
+            }
+        }
+
+        private void RioConnectThread()
+        {
+            while (!establishedConnectionWithRio && rioClient != null && runThreads)
+            {
+                try
+                {
+                    rioClient.Connect(rioAddress, rioPort);
+                    rioClient.Send(new byte[] { 0x33 }, 1);
+                    byte[] ret = rioClient.Receive(ref rioEndPoint);
+                    if (ret[0] == 0x77 && ret[1] == 0x62)
+                    {
+                        establishedConnectionWithRio = true;
+                        new System.Threading.Thread(UpdateRioBuf).Start();
+                    }
+                }
+                catch { }
+            }
+        }
+        private void UpdateRioBuf()
+        {
+            while (runThreads)
+            {
+                lock (rioLockObject)
+                {
+                    try
+                    {
+                        rioBuf = rioClient.Receive(ref rioEndPoint);
+                    }
+                    catch { }
+                }
+                System.Threading.Thread.Sleep(100);
+            }
+        }
+
+
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)
         {
             try
@@ -91,39 +180,29 @@ namespace FRCDashboard
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if(establishedConnection)
+            if(establishedConnectionWithPi)
             {
-                if(!gettingData)
-                    new System.Threading.Thread(UpdateUdpBuf).Start();
-                
-                double dist = BitConverter.ToDouble(buf, 0);
-                double angle = BitConverter.ToDouble(buf, 8);
-
-                if(BitConverter.IsLittleEndian)
+                lock (piLockObject)
                 {
-                    var ar = BitConverter.GetBytes(dist);
-                    Array.Reverse(ar);
-                    dist = BitConverter.ToDouble(ar, 0);
+                    double dist = BitConverter.ToDouble(piBuf, 0);
+                    double angle = BitConverter.ToDouble(piBuf, 8);
 
-                    ar = BitConverter.GetBytes(angle);
-                    Array.Reverse(ar);
-                    angle = BitConverter.ToDouble(ar, 0);
+                    if (BitConverter.IsLittleEndian)
+                    {
+                        var ar = BitConverter.GetBytes(dist);
+                        Array.Reverse(ar);
+                        dist = BitConverter.ToDouble(ar, 0);
+
+                        ar = BitConverter.GetBytes(angle);
+                        Array.Reverse(ar);
+                        angle = BitConverter.ToDouble(ar, 0);
+                    }
+
+                    lblTargetDistance.Text = "Target Distance: " + dist.ToString();
+                    lblTargetAngle.Text = "Target Angle: " + angle.ToString();
+                    lblCamPort.Text = "Camera Port: " + cameraStreamPort;
                 }
-
-                lblTargetDistance.Text = "Target Distance: " + dist.ToString();
-                lblTargetAngle.Text = "Target Angle: " + angle.ToString();
             }
-        }
-        private void UpdateUdpBuf()
-        {
-            gettingData = true;
-            try
-            {
-                while(true)
-                    buf = raspberryPiClient.Receive(ref piEndPoint);
-            }
-            catch { }
-            gettingData = false;
         }
     }
 }
