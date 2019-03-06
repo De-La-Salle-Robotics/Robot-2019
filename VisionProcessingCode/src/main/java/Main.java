@@ -21,15 +21,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import edu.wpi.cscore.CvSink;
+import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoMode;
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.vision.VisionThread;
 
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 /*
    JSON format:
@@ -182,27 +188,6 @@ public final class Main {
 	}
 
 	/**
-	 * Start running the camera.
-	 */
-	public static VideoSource startCamera(CameraConfig config) {
-		System.out.println("Starting camera '" + config.name + "' on " + config.path);
-		CameraServer inst = CameraServer.getInstance();
-		UsbCamera camera = new UsbCamera(config.name, config.path);
-		MjpegServer server = inst.startAutomaticCapture(camera);
-
-		Gson gson = new GsonBuilder().create();
-
-		camera.setConfigJson(gson.toJson(config.config));
-		camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
-
-		if (config.streamConfig != null) {
-			server.setConfigJson(gson.toJson(config.streamConfig));
-		}
-
-		return camera;
-	}
-
-	/**
 	 * Main.
 	 */
 	public static void main(String... args) {
@@ -229,38 +214,50 @@ public final class Main {
 		UsefulStuff.angleEntry = ntinst.getEntry("AngleEntry");
 		UsefulStuff.validDataEntry = ntinst.getEntry("ValidDataEntry");
 
-		// start cameras
-		List<VideoSource> cameras = new ArrayList<>();
-		for (CameraConfig cameraConfig : cameraConfigs) {
-			cameras.add(startCamera(cameraConfig));
-		}
+		CameraConfig config = cameraConfigs.get(0);
+		
+		System.out.println("Starting camera '" + config.name + "' on " + config.path);
+		UsbCamera camera = new UsbCamera(config.name, config.path);
+		MjpegServer server = new MjpegServer("CameraStream", UsefulStuff.CAMERA_PORT);
+		CvSource cvSource = new CvSource("cvsource", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
+		server.setSource(cvSource);
 
-		VisionTargetPipeline ballPipe = new VisionTargetPipeline();
+		Gson gson = new GsonBuilder().create();
 
-		// start image processing on camera 0 if present
-		if (cameras.size() >= 1) {
-			VisionThread visionThread = new VisionThread(cameras.get(0), ballPipe, pipeline -> {
-				// do something with pipeline results
-				ArrayList<MatOfPoint> arr = ballPipe.filterContoursOutput();
+		camera.setConfigJson(gson.toJson(config.config));
+		camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
-				UsefulStuff.validDataEntry.setBoolean(UsefulStuff.calculateDistAndAngle(arr));
+		VisionTargetPipeline visionPipe = new VisionTargetPipeline();
 
-			});
-			/*
-			 * something like this for GRIP: VisionThread visionThread = new
-			 * VisionThread(cameras.get(0), new GripPipeline(), pipeline -> { ... });
-			 */
-			visionThread.start();
+		VisionThread visionThread = new VisionThread(camera, visionPipe, pipeline -> {
+			// do something with pipeline results
+			ArrayList<MatOfPoint> arr = visionPipe.filterContoursOutput();
 
-			Thread udpConnectionThread = new Thread(new UsefulStuff());
-			udpConnectionThread.start();
-		}
+			boolean validData = UsefulStuff.calculateDistAndAngle(arr);
+			UsefulStuff.validDataEntry.setBoolean(validData);
+
+			Mat image = visionPipe.resizeImageOutput();
+
+			if(validData)
+			{
+				for(UsefulStuff.GroupedTarget target : UsefulStuff.targets)
+				{
+					Imgproc.rectangle(image, target.topLeft, target.bottomRight, new Scalar(25, 255, 239));
+				}
+			}
+			cvSource.putFrame(image);
+		});
+		visionThread.start();
+
+		Thread udpConnectionThread = new Thread(new UsefulStuff());
+		udpConnectionThread.start();
 
 		// loop forever
 		for (;;) {
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException ex) {
+				server.close();
 				return;
 			}
 		}

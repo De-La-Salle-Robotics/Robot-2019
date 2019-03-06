@@ -8,14 +8,38 @@ import edu.wpi.first.networktables.*;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 
 public class UsefulStuff implements Runnable {
+    public static final int CAMERA_PORT = 1182;
 
     static class UdpData
     {
         public double distanceValue;
         public double angleValue;
+    }
+    static class GroupedTarget
+    {
+        public IndividualTarget leftTarget;
+        public IndividualTarget rightTarget;
+        public Point topLeft;
+        public Point bottomRight;
+    }
+    static class IndividualTarget implements Comparator<IndividualTarget>
+    {
+        public double midPoint;
+        public boolean skewedLeft;
+        
+        public double farthestLeft;
+        public double farthestRight;
+        public double farthestUp;
+        public double farthestDown;
+
+        public int compare(IndividualTarget a, IndividualTarget b)
+        {
+            return (int)((a.midPoint - b.midPoint) * 100);
+        }
     }
     
 	private static double MAX_CAMERA_VALUE = 320;
@@ -25,7 +49,9 @@ public class UsefulStuff implements Runnable {
 	
 	public static NetworkTableEntry distanceEntry;
 	public static NetworkTableEntry angleEntry;
-	public static NetworkTableEntry validDataEntry;
+    public static NetworkTableEntry validDataEntry;
+
+    public static ArrayList<GroupedTarget> targets = new ArrayList<GroupedTarget>();
 
 	private static DatagramSocket computerSocket;
 	private static byte[] buf;
@@ -60,7 +86,7 @@ public class UsefulStuff implements Runnable {
                 port = packet.getPort();
 
                 packet = new DatagramPacket(buf, buf.length, computerAddress, port);
-                packet.setData(new byte[] { 0x77, 0x62 });
+                packet.setData(new byte[] { 0x77, 0x62, (byte)CAMERA_PORT, (byte)(CAMERA_PORT >> 8) });
                 computerSocket.send(packet);
                 System.out.println("=========================Got UDP Frame========================");
                 establishedConnection = true;
@@ -100,13 +126,40 @@ public class UsefulStuff implements Runnable {
 	{
 		if(contours.size() < 2) return false; //Return if there isn't at least 2 contours
 
-		double mid1 = getMiddleOfMat(contours.get(0));
-		double mid2 = getMiddleOfMat(contours.get(1));
+        targets.clear();
 
-		double seperation = Math.abs(mid1 - mid2);
+        ArrayList<IndividualTarget> tmp = new ArrayList<IndividualTarget>();
+        for(MatOfPoint mat : contours)
+        {
+            tmp.add(getTargetInfo(mat));
+        }
+        tmp.sort(new IndividualTarget());
+        for(int i = 0; i < tmp.size() - 1; i++)
+        {
+            IndividualTarget first = tmp.get(i);
+            IndividualTarget second = tmp.get(i+1);
+            if(!first.skewedLeft && second.skewedLeft)
+            {
+                GroupedTarget group = new GroupedTarget();
+                group.leftTarget = first;
+                group.rightTarget = second;
+
+                group.topLeft = new Point(first.farthestLeft / 2, Math.min(first.farthestUp, second.farthestUp) / 2);
+                group.bottomRight = new Point(second.farthestRight / 2, Math.max(first.farthestDown, second.farthestDown) / 2);
+
+                targets.add(group);
+
+                i++;
+            }
+        }
+        if(targets.size() == 0) return false;
+        IndividualTarget leftTarget = targets.get(0).leftTarget;
+        IndividualTarget rightTarget = targets.get(0).rightTarget;
+
+		double seperation = Math.abs(leftTarget.midPoint - rightTarget.midPoint);
 		double distance = DISTANCE_COEFFICIENT / seperation;
 		
-		double direction = ((mid1 + mid2) / 2) - (MAX_CAMERA_VALUE / 2);
+		double direction = ((leftTarget.midPoint + rightTarget.midPoint) / 2) - (MAX_CAMERA_VALUE / 2);
 		double angle = direction * PIXEL_DEGREE_COEFFICIENT;
 
 		distanceEntry.setDouble(distance);
@@ -125,19 +178,33 @@ public class UsefulStuff implements Runnable {
 		return true;
 	}
 
-	private static double getMiddleOfMat(MatOfPoint mat)
+	private static IndividualTarget getTargetInfo(MatOfPoint mat)
 	{
-		double smallest = 10000;
-		double largest = 0;
+        double leftPoint = 10000;
+        double leftPointY = 0;
+        double topY = 10000;
+        double rightPoint = 0;
+        double rightPointY = 0;
+        double bottomY = 0;
 
 		Point[] array = mat.toArray();
 
 		for(Point p : array)
 		{
-			if(p.x < smallest) smallest = p.x;
-			if(p.x > largest) largest = p.x;
-		}
+            if(p.y < topY) topY = p.y;
+            if(p.y > bottomY) bottomY = p.y;
 
-		return (smallest + largest) / 2;
+			if(p.x < leftPoint){ leftPoint = p.x; leftPointY = p.y; }
+			if(p.x > rightPoint) { rightPoint = p.x; rightPointY = p.y; }
+		}
+        IndividualTarget ret = new IndividualTarget();
+        ret.midPoint = (leftPoint + rightPoint) / 2;
+        ret.skewedLeft = leftPointY < rightPointY; // Less than because (0,0) is from upper left corner
+
+        ret.farthestLeft = leftPoint;
+        ret.farthestRight = rightPoint;
+        ret.farthestUp = topY;
+        ret.farthestDown = bottomY;
+		return ret;
 	}
 }

@@ -16,49 +16,59 @@ using AForge.Video.DirectShow;
 
 namespace FRCDashboard
 {
-    public partial class Form1 : Form
+    public partial class FRCDashboard : Form
     {
         private const string camStream = @"http://frcvision.local:1181/stream.mjpg";
         private MJPEGStream stream;
+        private int cameraStreamPort = 0;
 
-        private UdpClient client;
+        private UdpClient raspberryPiClient;
         private IPAddress piAddress;
         private bool establishedConnection;
         private IPEndPoint piEndPoint;
         private bool runThreads = true;
 
         private byte[] buf = new byte[256];
+        private bool gettingData = false;
 
-        public Form1()
+        public FRCDashboard()
         {
             InitializeComponent();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            stream = new MJPEGStream(camStream);
-            stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
-            stream.Start();
-
-            piAddress = IPAddress.Parse("10.0.0.156");
-            client = new UdpClient();
+            piAddress = Dns.GetHostAddresses("frcvision.local")[0];
+            lblRaspPiAddress.Text = "Raspberry Pi Address: " + piAddress.ToString();
+            raspberryPiClient = new UdpClient();
+            raspberryPiClient.Client.SendTimeout = 10;
+            raspberryPiClient.Client.ReceiveTimeout = 10; /* Very short timeouts to make sure we get the latest data quickly */
             establishedConnection = false;
             piEndPoint = new IPEndPoint(IPAddress.Any, 5800);
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
             new System.Threading.Thread(ConnectThread).Start();
         }
 
         private void ConnectThread()
         {
-            while (!establishedConnection && client != null && runThreads)
+            while (!establishedConnection && raspberryPiClient != null && runThreads)
             {
                 try
                 {
-                    client.Connect(piAddress, 5800);
-                    client.Send(new byte[] { 0x33 }, 1);
-                    byte[] ret = client.Receive(ref piEndPoint);
+                    raspberryPiClient.Connect(piAddress, 5800);
+                    raspberryPiClient.Send(new byte[] { 0x33 }, 1);
+                    byte[] ret = raspberryPiClient.Receive(ref piEndPoint);
                     if (ret[0] == 0x77 && ret[1] == 0x62)
+                    {
+                        cameraStreamPort = ret[2] | ((int)ret[3] << 8);
+                        stream = new MJPEGStream("http://frcvision.local:" + cameraStreamPort + "/stream.mjpg");
+                        stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
+                        stream.Start();
+
                         establishedConnection = true;
+                    }
                 }
                 catch { }
             }
@@ -75,6 +85,7 @@ namespace FRCDashboard
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             runThreads = false;
+            raspberryPiClient.Dispose();
             stream.Stop();
         }
 
@@ -82,7 +93,8 @@ namespace FRCDashboard
         {
             if(establishedConnection)
             {
-                new System.Threading.Thread(UpdateUdpBuf).Start();
+                if(!gettingData)
+                    new System.Threading.Thread(UpdateUdpBuf).Start();
                 
                 double dist = BitConverter.ToDouble(buf, 0);
                 double angle = BitConverter.ToDouble(buf, 8);
@@ -98,13 +110,20 @@ namespace FRCDashboard
                     angle = BitConverter.ToDouble(ar, 0);
                 }
 
-                lblDist.Text = dist.ToString();
-                lblAngle.Text = angle.ToString();
+                lblTargetDistance.Text = "Target Distance: " + dist.ToString();
+                lblTargetAngle.Text = "Target Angle: " + angle.ToString();
             }
         }
         private void UpdateUdpBuf()
         {
-            buf = client.Receive(ref piEndPoint);
+            gettingData = true;
+            try
+            {
+                while(true)
+                    buf = raspberryPiClient.Receive(ref piEndPoint);
+            }
+            catch { }
+            gettingData = false;
         }
     }
 }
