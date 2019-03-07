@@ -18,6 +18,8 @@ public class UsefulStuff implements Runnable {
     {
         public double distanceValue;
         public double angleValue;
+        public double rawSeperation;
+        public double rawMidpoint;
     }
     static class GroupedTarget
     {
@@ -42,7 +44,7 @@ public class UsefulStuff implements Runnable {
         }
     }
     
-	private static double MAX_CAMERA_VALUE = 320;
+	private static double MAX_CAMERA_VALUE = 480;
 	private static double DISTANCE_COEFFICIENT = 3092;
 	private static double PIXEL_DEGREE_COEFFICIENT = 0.1720141821143758644330723260584;
 
@@ -98,7 +100,10 @@ public class UsefulStuff implements Runnable {
     public static void sendUdpData(UdpData data)
     {
         ByteBuffer bb = ByteBuffer.allocate(256);
-        bb.putDouble(data.distanceValue).putDouble(data.angleValue);
+        bb.putDouble(data.distanceValue).
+        putDouble(data.angleValue).
+        putDouble(data.rawSeperation).
+        putDouble(data.rawMidpoint);
 
         byte[] sendData = bb.array();
         
@@ -144,8 +149,8 @@ public class UsefulStuff implements Runnable {
                 group.leftTarget = first;
                 group.rightTarget = second;
 
-                group.topLeft = new Point(first.farthestLeft / 2, Math.min(first.farthestUp, second.farthestUp) / 2);
-                group.bottomRight = new Point(second.farthestRight / 2, Math.max(first.farthestDown, second.farthestDown) / 2);
+                group.topLeft = new Point(first.farthestLeft, Math.min(first.farthestUp, second.farthestUp));
+                group.bottomRight = new Point(second.farthestRight, Math.max(first.farthestDown, second.farthestDown));
 
                 targets.add(group);
 
@@ -159,8 +164,8 @@ public class UsefulStuff implements Runnable {
 		double seperation = Math.abs(leftTarget.midPoint - rightTarget.midPoint);
 		double distance = DISTANCE_COEFFICIENT / seperation;
 		
-		double direction = ((leftTarget.midPoint + rightTarget.midPoint) / 2) - (MAX_CAMERA_VALUE / 2);
-		double angle = direction * PIXEL_DEGREE_COEFFICIENT;
+		double midpoint = ((leftTarget.midPoint + rightTarget.midPoint) / 2);
+		double angle = (midpoint - (MAX_CAMERA_VALUE / 2)) * PIXEL_DEGREE_COEFFICIENT;
 
 		distanceEntry.setDouble(distance);
         angleEntry.setDouble(angle);
@@ -169,6 +174,8 @@ public class UsefulStuff implements Runnable {
             UdpData dat = new UdpData();
             dat.distanceValue = distance;
             dat.angleValue = angle;
+            dat.rawSeperation = seperation;
+            dat.rawMidpoint = midpoint;
             sendUdpData(dat);
         }
 

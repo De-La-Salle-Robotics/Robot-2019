@@ -35,17 +35,21 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.lblRioAddress = new System.Windows.Forms.Label();
-            this.lblCamPort = new System.Windows.Forms.Label();
-            this.lblRaspPiAddress = new System.Windows.Forms.Label();
-            this.lblTargetAngle = new System.Windows.Forms.Label();
-            this.lblTargetDistance = new System.Windows.Forms.Label();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.grdRaspPi = new System.Windows.Forms.PropertyGrid();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.grdConnectionProperties = new System.Windows.Forms.PropertyGrid();
             this.chrtBezierDisplay = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.grdRio = new System.Windows.Forms.PropertyGrid();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chrtBezierDisplay)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,9 +58,9 @@
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Location = new System.Drawing.Point(0, 84);
+            this.pictureBox1.Location = new System.Drawing.Point(6, 6);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(872, 463);
+            this.pictureBox1.Size = new System.Drawing.Size(919, 498);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -73,64 +77,77 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.lblRioAddress);
-            this.splitContainer1.Panel1.Controls.Add(this.lblCamPort);
-            this.splitContainer1.Panel1.Controls.Add(this.lblRaspPiAddress);
-            this.splitContainer1.Panel1.Controls.Add(this.lblTargetAngle);
-            this.splitContainer1.Panel1.Controls.Add(this.lblTargetDistance);
-            this.splitContainer1.Panel1.Controls.Add(this.pictureBox1);
+            this.splitContainer1.Panel1.Controls.Add(this.tabControl1);
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.grdRio);
+            this.splitContainer1.Panel2.Controls.Add(this.grdRaspPi);
             this.splitContainer1.Panel2.Controls.Add(this.chrtBezierDisplay);
-            this.splitContainer1.Size = new System.Drawing.Size(1143, 547);
-            this.splitContainer1.SplitterDistance = 871;
+            this.splitContainer1.Size = new System.Drawing.Size(1231, 548);
+            this.splitContainer1.SplitterDistance = 938;
             this.splitContainer1.TabIndex = 2;
             // 
-            // lblRioAddress
+            // tabControl1
             // 
-            this.lblRioAddress.AutoSize = true;
-            this.lblRioAddress.Location = new System.Drawing.Point(3, 55);
-            this.lblRioAddress.Name = "lblRioAddress";
-            this.lblRioAddress.Size = new System.Drawing.Size(99, 13);
-            this.lblRioAddress.TabIndex = 5;
-            this.lblRioAddress.Text = "RoboRIO Address: ";
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(3, 3);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(936, 533);
+            this.tabControl1.TabIndex = 6;
             // 
-            // lblCamPort
+            // tabPage1
             // 
-            this.lblCamPort.AutoSize = true;
-            this.lblCamPort.Location = new System.Drawing.Point(182, 68);
-            this.lblCamPort.Name = "lblCamPort";
-            this.lblCamPort.Size = new System.Drawing.Size(71, 13);
-            this.lblCamPort.TabIndex = 4;
-            this.lblCamPort.Text = "Camera Port: ";
+            this.tabPage1.Controls.Add(this.pictureBox1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(928, 507);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Camera Stream";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // lblRaspPiAddress
+            // grdRaspPi
             // 
-            this.lblRaspPiAddress.AutoSize = true;
-            this.lblRaspPiAddress.Location = new System.Drawing.Point(3, 68);
-            this.lblRaspPiAddress.Name = "lblRaspPiAddress";
-            this.lblRaspPiAddress.Size = new System.Drawing.Size(114, 13);
-            this.lblRaspPiAddress.TabIndex = 3;
-            this.lblRaspPiAddress.Text = "Raspberry Pi Address: ";
+            this.grdRaspPi.HelpVisible = false;
+            this.grdRaspPi.Location = new System.Drawing.Point(3, 3);
+            this.grdRaspPi.Name = "grdRaspPi";
+            this.grdRaspPi.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+            this.grdRaspPi.Size = new System.Drawing.Size(253, 119);
+            this.grdRaspPi.TabIndex = 3;
+            this.grdRaspPi.ToolbarVisible = false;
             // 
-            // lblTargetAngle
+            // tabPage2
             // 
-            this.lblTargetAngle.AutoSize = true;
-            this.lblTargetAngle.Location = new System.Drawing.Point(3, 26);
-            this.lblTargetAngle.Name = "lblTargetAngle";
-            this.lblTargetAngle.Size = new System.Drawing.Size(71, 13);
-            this.lblTargetAngle.TabIndex = 2;
-            this.lblTargetAngle.Text = "Target Angle:";
+            this.tabPage2.Controls.Add(this.grdConnectionProperties);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(861, 506);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Connection Info";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // lblTargetDistance
+            // grdConnectionProperties
             // 
-            this.lblTargetDistance.AutoSize = true;
-            this.lblTargetDistance.Location = new System.Drawing.Point(3, 9);
-            this.lblTargetDistance.Name = "lblTargetDistance";
-            this.lblTargetDistance.Size = new System.Drawing.Size(86, 13);
-            this.lblTargetDistance.TabIndex = 1;
-            this.lblTargetDistance.Text = "Target Distance:";
+            this.grdConnectionProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.grdConnectionProperties.HelpVisible = false;
+            this.grdConnectionProperties.Location = new System.Drawing.Point(6, 6);
+            this.grdConnectionProperties.Name = "grdConnectionProperties";
+            this.grdConnectionProperties.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+            this.grdConnectionProperties.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.grdConnectionProperties.Size = new System.Drawing.Size(849, 494);
+            this.grdConnectionProperties.TabIndex = 6;
+            this.grdConnectionProperties.ToolbarVisible = false;
+            this.grdConnectionProperties.Enter += new System.EventHandler(this.grdConnectionProperties_Enter);
+            this.grdConnectionProperties.Leave += new System.EventHandler(this.grdConnectionProperties_Leave);
             // 
             // chrtBezierDisplay
             // 
@@ -139,22 +156,33 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             chartArea1.Name = "ChartArea1";
             this.chrtBezierDisplay.ChartAreas.Add(chartArea1);
-            this.chrtBezierDisplay.Location = new System.Drawing.Point(3, 3);
+            this.chrtBezierDisplay.Location = new System.Drawing.Point(3, 253);
             this.chrtBezierDisplay.Name = "chrtBezierDisplay";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
             series1.Name = "BezierCurvePoints";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             this.chrtBezierDisplay.Series.Add(series1);
-            this.chrtBezierDisplay.Size = new System.Drawing.Size(253, 532);
+            this.chrtBezierDisplay.Size = new System.Drawing.Size(274, 283);
             this.chrtBezierDisplay.TabIndex = 0;
             this.chrtBezierDisplay.Text = "chart1";
+            // 
+            // grdRio
+            // 
+            this.grdRio.HelpVisible = false;
+            this.grdRio.Location = new System.Drawing.Point(3, 128);
+            this.grdRio.Name = "grdRio";
+            this.grdRio.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+            this.grdRio.Size = new System.Drawing.Size(253, 119);
+            this.grdRio.TabIndex = 4;
+            this.grdRio.ToolbarVisible = false;
             // 
             // FRCDashboard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1143, 547);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(1231, 548);
             this.Controls.Add(this.splitContainer1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FRCDashboard";
@@ -163,10 +191,12 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chrtBezierDisplay)).EndInit();
             this.ResumeLayout(false);
 
@@ -178,11 +208,12 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chrtBezierDisplay;
-        private System.Windows.Forms.Label lblTargetAngle;
-        private System.Windows.Forms.Label lblTargetDistance;
-        private System.Windows.Forms.Label lblRaspPiAddress;
-        private System.Windows.Forms.Label lblCamPort;
-        private System.Windows.Forms.Label lblRioAddress;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.PropertyGrid grdConnectionProperties;
+        private System.Windows.Forms.PropertyGrid grdRaspPi;
+        private System.Windows.Forms.PropertyGrid grdRio;
     }
 }
 

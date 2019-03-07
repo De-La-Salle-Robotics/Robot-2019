@@ -18,7 +18,6 @@ namespace FRCDashboard
 {
     public partial class FRCDashboard : Form
     {
-        private const string camStream = @"http://frcvision.local:1181/stream.mjpg";
         private MJPEGStream stream;
         private int cameraStreamPort = 0;
 
@@ -30,6 +29,7 @@ namespace FRCDashboard
         private byte[] piBuf = new byte[256];
         private object piLockObject = new object();
         private bool attemptingToConnectToPi = false;
+        private RaspberryPiData raspberryPiData = new RaspberryPiData();
 
         private UdpClient rioClient;
         private IPAddress rioAddress;
@@ -39,6 +39,9 @@ namespace FRCDashboard
         private byte[] rioBuf = new byte[256];
         private object rioLockObject = new object();
         private bool attemptingToConnectToRio = false;
+
+        private ConnectionObject connectionObject = new ConnectionObject();
+        private bool setConnectionGridObject = true;
 
         private bool runThreads = true;
 
@@ -55,6 +58,8 @@ namespace FRCDashboard
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
+            grdConnectionProperties.SelectedObject = connectionObject;
+            grdRaspPi.SelectedObject = raspberryPiData;
         }
 
         private void AttemptConnectPi()
@@ -62,8 +67,8 @@ namespace FRCDashboard
             string piStringAddress;
             try
             {
-                piAddress = Dns.GetHostAddresses("frcvision.local")[0];
-                piStringAddress = "Raspberry Pi Address: " + piAddress.ToString();
+                piAddress = Dns.GetHostAddresses(connectionObject.RaspberryPiAddress)[0];
+                piStringAddress = piAddress.ToString();
                 raspberryPiClient = new UdpClient();
                 raspberryPiClient.Client.SendTimeout = 1000;
                 raspberryPiClient.Client.ReceiveTimeout = 1000;
@@ -74,12 +79,9 @@ namespace FRCDashboard
             }
             catch
             {
-                piStringAddress = "Raspberry Pi Address: Could not resolve Pi DNS";
+                piStringAddress = "Could not resolve " + connectionObject.RaspberryPiAddress;
             }
-            lblRaspPiAddress.Invoke((MethodInvoker)delegate
-            {
-                lblRaspPiAddress.Text = piStringAddress;
-            });
+            connectionObject.SetPiIp(piStringAddress);
             attemptingToConnectToPi = false;
         }
 
@@ -88,8 +90,8 @@ namespace FRCDashboard
             string rioStringAddress;
             try
             {
-                rioAddress = Dns.GetHostAddresses("roborio-7762-frc.local")[0];
-                rioStringAddress = "RoboRIO Address: " + rioAddress.ToString();
+                rioAddress = Dns.GetHostAddresses(connectionObject.RoboRioAddress)[0];
+                rioStringAddress = rioAddress.ToString();
                 rioClient = new UdpClient();
                 rioClient.Client.SendTimeout = 1000;
                 rioClient.Client.ReceiveTimeout = 1000;
@@ -100,12 +102,9 @@ namespace FRCDashboard
             }
             catch
             {
-                rioStringAddress = "RoboRIO Address: Could not resolve Rio DNS";
+                rioStringAddress = "Could not resolve " + connectionObject.RoboRioAddress;
             }
-            lblRioAddress.Invoke((MethodInvoker)delegate
-            {
-                lblRioAddress.Text = rioStringAddress;
-            });
+            connectionObject.SetRioIp(rioStringAddress);
             attemptingToConnectToRio = false;
         }
 
@@ -142,7 +141,12 @@ namespace FRCDashboard
                     {
                         piBuf = raspberryPiClient.Receive(ref piEndPoint);
                     }
-                    catch { }
+                    catch
+                    {
+                        stream.Stop();
+                        establishedConnectionWithPi = false;
+                        break;
+                    }
                 }
                 System.Threading.Thread.Sleep(100);
             }
@@ -182,6 +186,12 @@ namespace FRCDashboard
             }
         }
 
+        private void FlipDouble(ref double doub)
+        {
+            var ar = BitConverter.GetBytes(doub);
+            Array.Reverse(ar);
+            doub = BitConverter.ToDouble(ar, 0);
+        }
 
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)
         {
@@ -211,21 +221,22 @@ namespace FRCDashboard
                 {
                     double dist = BitConverter.ToDouble(piBuf, 0);
                     double angle = BitConverter.ToDouble(piBuf, 8);
+                    double rawSep = BitConverter.ToDouble(piBuf, 16);
+                    double rawMid = BitConverter.ToDouble(piBuf, 24);
 
                     if (BitConverter.IsLittleEndian)
                     {
-                        var ar = BitConverter.GetBytes(dist);
-                        Array.Reverse(ar);
-                        dist = BitConverter.ToDouble(ar, 0);
-
-                        ar = BitConverter.GetBytes(angle);
-                        Array.Reverse(ar);
-                        angle = BitConverter.ToDouble(ar, 0);
+                        FlipDouble(ref dist);
+                        FlipDouble(ref angle);
+                        FlipDouble(ref rawSep);
+                        FlipDouble(ref rawMid);
                     }
 
-                    lblTargetDistance.Text = "Target Distance: " + dist.ToString();
-                    lblTargetAngle.Text = "Target Angle: " + angle.ToString();
-                    lblCamPort.Text = "Camera Port: " + cameraStreamPort;
+                    raspberryPiData.SetTargetAngle(angle);
+                    raspberryPiData.SetTargetDistance(dist);
+                    raspberryPiData.SetRawSeperation(rawSep);
+                    raspberryPiData.SetRawMidpoint(rawMid);
+                    connectionObject.SetPiPort(cameraStreamPort.ToString());
                 }
             }
             else
@@ -253,6 +264,23 @@ namespace FRCDashboard
                     tmp.Start();
                 }
             }
+
+            if (setConnectionGridObject)
+                grdConnectionProperties.SelectedObject = connectionObject;
+            else
+                connectionObject = (ConnectionObject)grdConnectionProperties.SelectedObject;
+
+            grdRaspPi.SelectedObject = raspberryPiData;
+        }
+
+        private void grdConnectionProperties_Enter(object sender, EventArgs e)
+        {
+            setConnectionGridObject = false;
+        }
+
+        private void grdConnectionProperties_Leave(object sender, EventArgs e)
+        {
+            setConnectionGridObject = true;
         }
     }
 }

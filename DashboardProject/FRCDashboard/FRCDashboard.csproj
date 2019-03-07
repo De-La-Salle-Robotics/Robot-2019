@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionObject.cs" />
     <Compile Include="FRCDashboard.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -71,6 +72,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaspberryPiData.cs" />
     <EmbeddedResource Include="FRCDashboard.resx">
       <DependentUpon>FRCDashboard.cs</DependentUpon>
     </EmbeddedResource>

@@ -242,7 +242,7 @@ public final class Main {
 			{
 				for(UsefulStuff.GroupedTarget target : UsefulStuff.targets)
 				{
-					Imgproc.rectangle(image, target.topLeft, target.bottomRight, new Scalar(25, 255, 239));
+					Imgproc.rectangle(image, scale(target.topLeft, 0.5), scale(target.bottomRight, 0.5), new Scalar(25, 255, 239));
 				}
 			}
 			cvSource.putFrame(image);
@@ -263,4 +263,10 @@ public final class Main {
 		}
 	}
 
+	private static Point scale(Point target, double scalar)
+	{
+		double x = target.x * scalar;
+		double y = target.y * scalar;
+		return new Point(x, y);
+	}
 }
