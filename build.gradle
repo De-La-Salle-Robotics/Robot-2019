@@ -1,15 +1,7 @@
-import edu.wpi.first.gradlerio.frc.FRCPlugin
-import edu.wpi.first.toolchain.NativePlatforms
-
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2019.4.1"
-    id "cpp"
-    id "edu.wpi.first.GradleJni" version "0.3.1"
 }
-
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
@@ -31,6 +23,14 @@ deploy {
             // Debug can be overridden by command line, for use with VSCode
             debug = frc.getDebugOrDefault(false)
         }
+        // Built in artifact to deploy arbitrary files to the roboRIO.
+        fileTreeArtifact('frcStaticFileDeploy') {
+            // The directory below is the local directory to deploy
+            files = fileTree(dir: 'src/main/deploy')
+            // Deploy to RoboRIO target, into /home/lvuser/deploy
+            targets << "roborio"
+            directory = '/home/lvuser/deploy'
+        }
     }
 }
 
@@ -50,6 +50,7 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
     testCompile 'junit:junit:4.12'
+    simulation "edu.wpi.first.halsim:halsim_ds_socket:${wpi.wpilibVersion}:${wpi.platforms.desktop}@zip"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
@@ -59,4 +60,3 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
 }
-
