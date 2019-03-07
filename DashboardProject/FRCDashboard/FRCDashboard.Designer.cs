@@ -90,7 +90,7 @@
             // lblRioAddress
             // 
             this.lblRioAddress.AutoSize = true;
-            this.lblRioAddress.Location = new System.Drawing.Point(6, 52);
+            this.lblRioAddress.Location = new System.Drawing.Point(3, 55);
             this.lblRioAddress.Name = "lblRioAddress";
             this.lblRioAddress.Size = new System.Drawing.Size(99, 13);
             this.lblRioAddress.TabIndex = 5;

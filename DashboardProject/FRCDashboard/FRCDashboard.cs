@@ -65,8 +65,8 @@ namespace FRCDashboard
                 piAddress = Dns.GetHostAddresses("frcvision.local")[0];
                 piStringAddress = "Raspberry Pi Address: " + piAddress.ToString();
                 raspberryPiClient = new UdpClient();
-                raspberryPiClient.Client.SendTimeout = 100;
-                raspberryPiClient.Client.ReceiveTimeout = 100;
+                raspberryPiClient.Client.SendTimeout = 1000;
+                raspberryPiClient.Client.ReceiveTimeout = 1000;
                 raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
 
@@ -91,8 +91,8 @@ namespace FRCDashboard
                 rioAddress = Dns.GetHostAddresses("roborio-7762-frc.local")[0];
                 rioStringAddress = "RoboRIO Address: " + rioAddress.ToString();
                 rioClient = new UdpClient();
-                rioClient.Client.SendTimeout = 100;
-                rioClient.Client.ReceiveTimeout = 100;
+                rioClient.Client.SendTimeout = 1000;
+                rioClient.Client.ReceiveTimeout = 1000;
                 rioClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 rioEndPoint = new IPEndPoint(IPAddress.Any, rioPort);
 
@@ -187,6 +187,8 @@ namespace FRCDashboard
         {
             try
             {
+                if(pictureBox1.Image != null)
+                    pictureBox1.Image.Dispose();
                 pictureBox1.Image = (Bitmap)e.Frame.Clone();
             }
             catch { }
