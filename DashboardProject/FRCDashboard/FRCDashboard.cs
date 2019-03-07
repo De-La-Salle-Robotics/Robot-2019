@@ -29,6 +29,7 @@ namespace FRCDashboard
         private int piPort = 5800;
         private byte[] piBuf = new byte[256];
         private object piLockObject = new object();
+        private bool attemptingToConnectToPi = false;
 
         private UdpClient rioClient;
         private IPAddress rioAddress;
@@ -37,6 +38,7 @@ namespace FRCDashboard
         private int rioPort = 5801;
         private byte[] rioBuf = new byte[256];
         private object rioLockObject = new object();
+        private bool attemptingToConnectToRio = false;
 
         private bool runThreads = true;
 
@@ -48,44 +50,63 @@ namespace FRCDashboard
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            establishedConnectionWithPi = false;
+            establishedConnectionWithRio = false;
+
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+
+        }
+
+        private void AttemptConnectPi()
+        {
+            string piStringAddress;
             try
             {
                 piAddress = Dns.GetHostAddresses("frcvision.local")[0];
-                lblRaspPiAddress.Text = "Raspberry Pi Address: " + piAddress.ToString();
+                piStringAddress = "Raspberry Pi Address: " + piAddress.ToString();
                 raspberryPiClient = new UdpClient();
                 raspberryPiClient.Client.SendTimeout = 100;
                 raspberryPiClient.Client.ReceiveTimeout = 100;
                 raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
-                establishedConnectionWithPi = false;
                 piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
 
                 new System.Threading.Thread(PiConnectThread).Start();
             }
             catch
             {
-                lblRaspPiAddress.Text = "Raspberry Pi Address: Could not resolve Pi DNS";
+                piStringAddress = "Raspberry Pi Address: Could not resolve Pi DNS";
             }
-            
+            lblRaspPiAddress.Invoke((MethodInvoker)delegate
+            {
+                lblRaspPiAddress.Text = piStringAddress;
+            });
+            attemptingToConnectToPi = false;
+        }
+
+        private void AttemptConnectRio()
+        {
+            string rioStringAddress;
             try
             {
                 rioAddress = Dns.GetHostAddresses("roborio-7762-frc.local")[0];
-                lblRioAddress.Text = "RoboRIO Address: " + rioAddress.ToString();
+                rioStringAddress = "RoboRIO Address: " + rioAddress.ToString();
                 rioClient = new UdpClient();
                 rioClient.Client.SendTimeout = 100;
                 rioClient.Client.ReceiveTimeout = 100;
                 rioClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
-                establishedConnectionWithRio = false;
                 rioEndPoint = new IPEndPoint(IPAddress.Any, rioPort);
 
                 new System.Threading.Thread(RioConnectThread).Start();
             }
             catch
             {
-                lblRioAddress.Text = "RoboRIO Address: Could not resolve Rio DNS";
+                rioStringAddress = "RoboRIO Address: Could not resolve Rio DNS";
             }
-
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-
+            lblRioAddress.Invoke((MethodInvoker)delegate
+            {
+                lblRioAddress.Text = rioStringAddress;
+            });
+            attemptingToConnectToRio = false;
         }
 
         private void PiConnectThread()
@@ -174,8 +195,10 @@ namespace FRCDashboard
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             runThreads = false;
-            raspberryPiClient.Dispose();
-            stream.Stop();
+            if(raspberryPiClient != null)
+                raspberryPiClient.Dispose();
+            if(stream != null)
+                stream.Stop();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -201,6 +224,31 @@ namespace FRCDashboard
                     lblTargetDistance.Text = "Target Distance: " + dist.ToString();
                     lblTargetAngle.Text = "Target Angle: " + angle.ToString();
                     lblCamPort.Text = "Camera Port: " + cameraStreamPort;
+                }
+            }
+            else
+            {
+                if (!attemptingToConnectToPi)
+                {
+                    attemptingToConnectToPi = true;
+                    var tmp = new System.Threading.Thread(AttemptConnectPi);
+                    tmp.IsBackground = true;
+                    tmp.Start();
+                }  
+            }
+
+            if(establishedConnectionWithRio)
+            {
+
+            }
+            else
+            {
+                if(!attemptingToConnectToRio)
+                {
+                    attemptingToConnectToRio = true;
+                    var tmp = new System.Threading.Thread(AttemptConnectRio);
+                    tmp.IsBackground = true;
+                    tmp.Start();
                 }
             }
         }
