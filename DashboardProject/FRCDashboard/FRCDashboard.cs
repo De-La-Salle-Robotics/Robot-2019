@@ -26,8 +26,6 @@ namespace FRCDashboard
         private bool establishedConnectionWithPi;
         private IPEndPoint piEndPoint;
         private int piPort = 5800;
-        private byte[] piBuf = new byte[256];
-        private object piLockObject = new object();
         private bool attemptingToConnectToPi = false;
         private RaspberryPiData raspberryPiData = new RaspberryPiData();
 
@@ -37,7 +35,6 @@ namespace FRCDashboard
         private IPEndPoint rioEndPoint;
         private int rioPort = 5801;
         private byte[] rioBuf = new byte[256];
-        private object rioLockObject = new object();
         private bool attemptingToConnectToRio = false;
 
         private ConnectionObject connectionObject = new ConnectionObject();
@@ -70,8 +67,8 @@ namespace FRCDashboard
                 piAddress = Dns.GetHostAddresses(connectionObject.RaspberryPiAddress)[0];
                 piStringAddress = piAddress.ToString();
                 raspberryPiClient = new UdpClient();
-                raspberryPiClient.Client.SendTimeout = 1000;
-                raspberryPiClient.Client.ReceiveTimeout = 1000;
+                raspberryPiClient.Client.SendTimeout = 500;
+                raspberryPiClient.Client.ReceiveTimeout = 500;
                 raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
 
@@ -93,8 +90,8 @@ namespace FRCDashboard
                 rioAddress = Dns.GetHostAddresses(connectionObject.RoboRioAddress)[0];
                 rioStringAddress = rioAddress.ToString();
                 rioClient = new UdpClient();
-                rioClient.Client.SendTimeout = 1000;
-                rioClient.Client.ReceiveTimeout = 1000;
+                rioClient.Client.SendTimeout = 500;
+                rioClient.Client.ReceiveTimeout = 500;
                 rioClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 rioEndPoint = new IPEndPoint(IPAddress.Any, rioPort);
 
@@ -105,7 +102,6 @@ namespace FRCDashboard
                 rioStringAddress = "Could not resolve " + connectionObject.RoboRioAddress;
             }
             connectionObject.SetRioIp(rioStringAddress);
-            attemptingToConnectToRio = false;
         }
 
         private void PiConnectThread()
@@ -120,34 +116,57 @@ namespace FRCDashboard
                     if (ret[0] == 0x77 && ret[1] == 0x62)
                     {
                         cameraStreamPort = ret[2] | ((int)ret[3] << 8);
-                        stream = new MJPEGStream("http://frcvision.local:" + cameraStreamPort + "/stream.mjpg");
+
+                        connectionObject.SetPiPort(cameraStreamPort);
+                        stream = new MJPEGStream("http://" + connectionObject.RaspberryPiAddress + ":" + cameraStreamPort + "/stream.mjpg");
                         stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
                         stream.Start();
 
                         establishedConnectionWithPi = true;
-                        new System.Threading.Thread(UpdatePiBuf).Start();
+                        new System.Threading.Thread(PiUpdater).Start();
                     }
                 }
                 catch { }
             }
+            attemptingToConnectToRio = false;
         }
-        private void UpdatePiBuf()
+        private void PiUpdater()
         {
             while (runThreads)
             {
-                lock (piLockObject)
+                byte[] piBuf;
+                try
                 {
-                    try
-                    {
-                        piBuf = raspberryPiClient.Receive(ref piEndPoint);
-                    }
-                    catch
-                    {
-                        stream.Stop();
-                        establishedConnectionWithPi = false;
-                        break;
-                    }
+                    piBuf = raspberryPiClient.Receive(ref piEndPoint);
                 }
+                catch
+                {
+                    stream.Stop();
+                    establishedConnectionWithPi = false;
+                    break;
+                }
+
+                double dist = BitConverter.ToDouble(piBuf, 0);
+                double angle = BitConverter.ToDouble(piBuf, 8);
+                double rawSep = BitConverter.ToDouble(piBuf, 16);
+                double rawMid = BitConverter.ToDouble(piBuf, 24);
+                long loopTime = BitConverter.ToInt64(piBuf, 32);
+
+                if (BitConverter.IsLittleEndian)
+                {
+                    FlipDouble(ref dist);
+                    FlipDouble(ref angle);
+                    FlipDouble(ref rawSep);
+                    FlipDouble(ref rawMid);
+                    FlipLong(ref loopTime);
+                }
+
+                raspberryPiData.SetTargetAngle(angle);
+                raspberryPiData.SetTargetDistance(dist);
+                raspberryPiData.SetRawSeperation(rawSep);
+                raspberryPiData.SetRawMidpoint(rawMid);
+                raspberryPiData.SetLoopTime(loopTime);
+
                 System.Threading.Thread.Sleep(100);
             }
         }
@@ -174,14 +193,11 @@ namespace FRCDashboard
         {
             while (runThreads)
             {
-                lock (rioLockObject)
+                try
                 {
-                    try
-                    {
-                        rioBuf = rioClient.Receive(ref rioEndPoint);
-                    }
-                    catch { }
+                    rioBuf = rioClient.Receive(ref rioEndPoint);
                 }
+                catch { }
                 System.Threading.Thread.Sleep(100);
             }
         }
@@ -191,6 +207,12 @@ namespace FRCDashboard
             var ar = BitConverter.GetBytes(doub);
             Array.Reverse(ar);
             doub = BitConverter.ToDouble(ar, 0);
+        }
+        private void FlipLong(ref long lng)
+        {
+            var ar = BitConverter.GetBytes(lng);
+            Array.Reverse(ar);
+            lng = BitConverter.ToInt64(ar, 0);
         }
 
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)
@@ -217,27 +239,7 @@ namespace FRCDashboard
         {
             if(establishedConnectionWithPi)
             {
-                lock (piLockObject)
-                {
-                    double dist = BitConverter.ToDouble(piBuf, 0);
-                    double angle = BitConverter.ToDouble(piBuf, 8);
-                    double rawSep = BitConverter.ToDouble(piBuf, 16);
-                    double rawMid = BitConverter.ToDouble(piBuf, 24);
 
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        FlipDouble(ref dist);
-                        FlipDouble(ref angle);
-                        FlipDouble(ref rawSep);
-                        FlipDouble(ref rawMid);
-                    }
-
-                    raspberryPiData.SetTargetAngle(angle);
-                    raspberryPiData.SetTargetDistance(dist);
-                    raspberryPiData.SetRawSeperation(rawSep);
-                    raspberryPiData.SetRawMidpoint(rawMid);
-                    connectionObject.SetPiPort(cameraStreamPort.ToString());
-                }
             }
             else
             {

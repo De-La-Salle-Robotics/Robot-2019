@@ -246,6 +246,8 @@ public final class Main {
 				}
 			}
 			cvSource.putFrame(image);
+
+			UsefulStuff.sendUdpData();
 		});
 		visionThread.start();
 

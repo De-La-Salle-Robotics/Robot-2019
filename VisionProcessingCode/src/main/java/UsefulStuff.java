@@ -20,6 +20,7 @@ public class UsefulStuff implements Runnable {
         public double angleValue;
         public double rawSeperation;
         public double rawMidpoint;
+        public long loopTime;
     }
     static class GroupedTarget
     {
@@ -47,7 +48,6 @@ public class UsefulStuff implements Runnable {
 	private static double MAX_CAMERA_VALUE = 480;
 	private static double DISTANCE_COEFFICIENT = 3092;
 	private static double PIXEL_DEGREE_COEFFICIENT = 0.1720141821143758644330723260584;
-
 	
 	public static NetworkTableEntry distanceEntry;
 	public static NetworkTableEntry angleEntry;
@@ -59,8 +59,9 @@ public class UsefulStuff implements Runnable {
 	private static byte[] buf;
     private static InetAddress computerAddress;
     private static int port;
+    private static long loopTime;
 
-	private static boolean establishedConnection = false;
+    private static UdpData dat = new UdpData();
 
 	public static void handleUDP()
 	{
@@ -91,23 +92,24 @@ public class UsefulStuff implements Runnable {
                 packet.setData(new byte[] { 0x77, 0x62, (byte)CAMERA_PORT, (byte)(CAMERA_PORT >> 8) });
                 computerSocket.send(packet);
                 System.out.println("=========================Got UDP Frame========================");
-                establishedConnection = true;
+                System.out.println("Computer IP: " + computerAddress.toString() + ":" + port);
             }
         }
         catch(Exception ex) { System.out.println(ex.toString()); return; }
     }
 
-    public static void sendUdpData(UdpData data)
+    public static void sendUdpData()
     {
         ByteBuffer bb = ByteBuffer.allocate(256);
-        bb.putDouble(data.distanceValue).
-        putDouble(data.angleValue).
-        putDouble(data.rawSeperation).
-        putDouble(data.rawMidpoint);
+        bb.putDouble(dat.distanceValue).
+        putDouble(dat.angleValue).
+        putDouble(dat.rawSeperation).
+        putDouble(dat.rawMidpoint).
+        putLong(dat.loopTime);
 
         byte[] sendData = bb.array();
-        
-        DatagramPacket packet = new DatagramPacket(sendData, bb.capacity(), computerAddress, port);
+
+        DatagramPacket packet = new DatagramPacket(sendData, sendData.length, computerAddress, port);
         try
         {
             computerSocket.send(packet);
@@ -169,16 +171,14 @@ public class UsefulStuff implements Runnable {
 
 		distanceEntry.setDouble(distance);
         angleEntry.setDouble(angle);
-        if(establishedConnection)
-        {
-            UdpData dat = new UdpData();
-            dat.distanceValue = distance;
-            dat.angleValue = angle;
-            dat.rawSeperation = seperation;
-            dat.rawMidpoint = midpoint;
-            sendUdpData(dat);
-        }
 
+        dat.distanceValue = distance;
+        dat.angleValue = angle;
+        dat.rawSeperation = seperation;
+        dat.rawMidpoint = midpoint;
+        dat.loopTime = System.currentTimeMillis() - loopTime;
+
+        loopTime = System.currentTimeMillis();
 		return true;
 	}
 
