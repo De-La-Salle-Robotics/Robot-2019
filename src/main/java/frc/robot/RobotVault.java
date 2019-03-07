@@ -22,7 +22,7 @@ public class RobotVault {
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
         hablift = new HabLift(RobotMap.liftMaster);
-        cameraLocalization = new CameraLocalization(RobotMap.pixyCam);
+        cameraLocalization = new CameraLocalization(RobotMap.ntInst);
         /* Drivetrain depends on previous instantiations */
         drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization , led);
 
