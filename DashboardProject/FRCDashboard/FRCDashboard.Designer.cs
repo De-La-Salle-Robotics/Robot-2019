@@ -37,11 +37,11 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.grdRaspPi = new System.Windows.Forms.PropertyGrid();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.grdConnectionProperties = new System.Windows.Forms.PropertyGrid();
-            this.chrtBezierDisplay = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.grdRio = new System.Windows.Forms.PropertyGrid();
+            this.grdRaspPi = new System.Windows.Forms.PropertyGrid();
+            this.chrtBezierDisplay = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -112,23 +112,13 @@
             this.tabPage1.Text = "Camera Stream";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // grdRaspPi
-            // 
-            this.grdRaspPi.HelpVisible = false;
-            this.grdRaspPi.Location = new System.Drawing.Point(3, 3);
-            this.grdRaspPi.Name = "grdRaspPi";
-            this.grdRaspPi.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.grdRaspPi.Size = new System.Drawing.Size(253, 119);
-            this.grdRaspPi.TabIndex = 3;
-            this.grdRaspPi.ToolbarVisible = false;
-            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.grdConnectionProperties);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(861, 506);
+            this.tabPage2.Size = new System.Drawing.Size(928, 507);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Connection Info";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -143,11 +133,32 @@
             this.grdConnectionProperties.Name = "grdConnectionProperties";
             this.grdConnectionProperties.PropertySort = System.Windows.Forms.PropertySort.NoSort;
             this.grdConnectionProperties.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.grdConnectionProperties.Size = new System.Drawing.Size(849, 494);
+            this.grdConnectionProperties.Size = new System.Drawing.Size(916, 495);
             this.grdConnectionProperties.TabIndex = 6;
             this.grdConnectionProperties.ToolbarVisible = false;
             this.grdConnectionProperties.Enter += new System.EventHandler(this.grdConnectionProperties_Enter);
             this.grdConnectionProperties.Leave += new System.EventHandler(this.grdConnectionProperties_Leave);
+            this.grdConnectionProperties.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.grdConnectionProperties_PreviewKeyDown);
+            // 
+            // grdRio
+            // 
+            this.grdRio.HelpVisible = false;
+            this.grdRio.Location = new System.Drawing.Point(3, 128);
+            this.grdRio.Name = "grdRio";
+            this.grdRio.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+            this.grdRio.Size = new System.Drawing.Size(253, 119);
+            this.grdRio.TabIndex = 4;
+            this.grdRio.ToolbarVisible = false;
+            // 
+            // grdRaspPi
+            // 
+            this.grdRaspPi.HelpVisible = false;
+            this.grdRaspPi.Location = new System.Drawing.Point(3, 3);
+            this.grdRaspPi.Name = "grdRaspPi";
+            this.grdRaspPi.PropertySort = System.Windows.Forms.PropertySort.NoSort;
+            this.grdRaspPi.Size = new System.Drawing.Size(253, 119);
+            this.grdRaspPi.TabIndex = 3;
+            this.grdRaspPi.ToolbarVisible = false;
             // 
             // chrtBezierDisplay
             // 
@@ -166,16 +177,6 @@
             this.chrtBezierDisplay.Size = new System.Drawing.Size(274, 283);
             this.chrtBezierDisplay.TabIndex = 0;
             this.chrtBezierDisplay.Text = "chart1";
-            // 
-            // grdRio
-            // 
-            this.grdRio.HelpVisible = false;
-            this.grdRio.Location = new System.Drawing.Point(3, 128);
-            this.grdRio.Name = "grdRio";
-            this.grdRio.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.grdRio.Size = new System.Drawing.Size(253, 119);
-            this.grdRio.TabIndex = 4;
-            this.grdRio.ToolbarVisible = false;
             // 
             // FRCDashboard
             // 

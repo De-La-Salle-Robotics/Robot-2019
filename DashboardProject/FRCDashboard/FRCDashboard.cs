@@ -42,6 +42,7 @@ namespace FRCDashboard
 
         private bool runThreads = true;
 
+        System.Diagnostics.Stopwatch st = new System.Diagnostics.Stopwatch();
 
         public FRCDashboard()
         {
@@ -57,6 +58,7 @@ namespace FRCDashboard
 
             grdConnectionProperties.SelectedObject = connectionObject;
             grdRaspPi.SelectedObject = raspberryPiData;
+            st.Start();
         }
 
         private void AttemptConnectPi()
@@ -71,8 +73,26 @@ namespace FRCDashboard
                 raspberryPiClient.Client.ReceiveTimeout = 500;
                 raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
+                
+                while (!establishedConnectionWithPi && raspberryPiClient != null && runThreads)
+                {
+                    raspberryPiClient.Connect(piAddress, piPort);
+                    raspberryPiClient.Send(new byte[] { 0x33 }, 1);
+                    byte[] ret = raspberryPiClient.Receive(ref piEndPoint);
+                    if (ret[0] == 0x77 && ret[1] == 0x62)
+                    {
+                        cameraStreamPort = ret[2] | ((int)ret[3] << 8);
 
-                new System.Threading.Thread(PiConnectThread).Start();
+                        connectionObject.SetPiPort(cameraStreamPort);
+                        stream = new MJPEGStream("http://" + connectionObject.RaspberryPiAddress + ":" + cameraStreamPort + "/stream.mjpg");
+                        stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
+                        stream.Start();
+
+                        establishedConnectionWithPi = true;
+                        new System.Threading.Thread(PiUpdateThread).Start();
+                    }
+                    System.Threading.Thread.Sleep(1000);
+                }
             }
             catch
             {
@@ -104,35 +124,9 @@ namespace FRCDashboard
             connectionObject.SetRioIp(rioStringAddress);
         }
 
-        private void PiConnectThread()
+        private void PiUpdateThread()
         {
-            while (!establishedConnectionWithPi && raspberryPiClient != null && runThreads)
-            {
-                try
-                {
-                    raspberryPiClient.Connect(piAddress, piPort);
-                    raspberryPiClient.Send(new byte[] { 0x33 }, 1);
-                    byte[] ret = raspberryPiClient.Receive(ref piEndPoint);
-                    if (ret[0] == 0x77 && ret[1] == 0x62)
-                    {
-                        cameraStreamPort = ret[2] | ((int)ret[3] << 8);
-
-                        connectionObject.SetPiPort(cameraStreamPort);
-                        stream = new MJPEGStream("http://" + connectionObject.RaspberryPiAddress + ":" + cameraStreamPort + "/stream.mjpg");
-                        stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
-                        stream.Start();
-
-                        establishedConnectionWithPi = true;
-                        new System.Threading.Thread(PiUpdater).Start();
-                    }
-                }
-                catch { }
-            }
-            attemptingToConnectToRio = false;
-        }
-        private void PiUpdater()
-        {
-            while (runThreads)
+            while (establishedConnectionWithPi && runThreads)
             {
                 byte[] piBuf;
                 try
@@ -188,6 +182,7 @@ namespace FRCDashboard
                 }
                 catch { }
             }
+            attemptingToConnectToRio = false;
         }
         private void UpdateRioBuf()
         {
@@ -219,7 +214,13 @@ namespace FRCDashboard
         {
             try
             {
-                if(pictureBox1.Image != null)
+                double elapsed = st.ElapsedMilliseconds;
+                if (elapsed == 0) elapsed = 1;
+                raspberryPiData.SetBandwidth(((stream.BytesReceived * 8) / 1e6) * (1000 / elapsed));
+                st.Reset();
+                st.Start();
+
+                if (pictureBox1.Image != null)
                     pictureBox1.Image.Dispose();
                 pictureBox1.Image = (Bitmap)e.Frame.Clone();
             }
@@ -283,6 +284,15 @@ namespace FRCDashboard
         private void grdConnectionProperties_Leave(object sender, EventArgs e)
         {
             setConnectionGridObject = true;
+        }
+
+        private void grdConnectionProperties_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                setConnectionGridObject = true;
+
+            }
         }
     }
 }
