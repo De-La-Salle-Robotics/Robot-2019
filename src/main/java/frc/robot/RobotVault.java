@@ -21,12 +21,12 @@ public class RobotVault {
         led = new LED(RobotMap.can1);
         arm = new Arm(RobotMap.arm);
         claw = new Claw(RobotMap.claw1, RobotMap.claw2);
-        hablift = new HabLift(RobotMap.liftMaster);
+        hablift = new HabLift(RobotMap.liftLeftMaster, RobotMap.liftRightMaster);
         cameraLocalization = new CameraLocalization(RobotMap.ntInst);
         /* Drivetrain depends on previous instantiations */
         drivetrain = new Drivetrain(RobotMap.leftDrivetrain, RobotMap.rightDrivetrain, RobotMap.pigeon, cameraLocalization , led);
 
-        deviceChecker = new DeviceChecker(RobotMap.liftHelper, RobotMap.armHelper, 
+        deviceChecker = new DeviceChecker(RobotMap.liftLeftHelper, RobotMap.liftRightHelper, RobotMap.armHelper, 
             RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
     }
 
@@ -43,13 +43,15 @@ public class RobotVault {
         boolean open = RobotMap.joy2.getRawButton(2);
         boolean close = RobotMap.joy2.getRawButton(3);
 
-        boolean raise = RobotMap.joy2.getRawButton(5);
-        boolean lower = RobotMap.joy2.getRawButton(6);
+        boolean raiseLeft = RobotMap.joy2.getRawButton(5);
+        boolean raiseRight = RobotMap.joy2.getRawButton(6);
+        boolean lowerLeft = RobotMap.joy2.getRawButton(7); /* These may actually be axis, IDK what joy2 is */
+        boolean lowerRight = RobotMap.joy2.getRawButton(8);
 
         drivetrain.driveControl(throttle, wheel, driverAssist);
         arm.armControl(up, down);
         claw.clawControl(close, open);
-        hablift.liftControl(raise, lower);    
+        hablift.liftControl(raiseLeft, raiseRight, lowerLeft, lowerRight);    
 
         if(RobotMap.joy1.getRawButton(1))
         {

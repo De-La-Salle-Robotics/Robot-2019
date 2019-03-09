@@ -29,10 +29,10 @@ public class RobotMap {
     public static final Servo claw2 = new Servo(1);
 
     /* Lift motor controllers */
-    public static final VictorSPX liftMaster = new VictorSPX(4);
-    public static final VictorSPX lift2 = new VictorSPX(5);
-    public static final VictorSPX lift3 = new VictorSPX(6);
-    public static final VictorSPX lift4 = new VictorSPX(7);
+    public static final VictorSPX liftLeftMaster = new VictorSPX(4);
+    public static final VictorSPX liftLeftSlave = new VictorSPX(5);
+    public static final VictorSPX liftRightMaster = new VictorSPX(6);
+    public static final VictorSPX liftRightSlave = new VictorSPX(7);
 
     /* Miscellaneous Items */
     public static final PowerDistributionPanel pdp = new PowerDistributionPanel(0);
@@ -51,7 +51,8 @@ public class RobotMap {
     public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);
     public static final RightDriveConfiguration rightDriveHelper = new RightDriveConfiguration(rightDrivetrain, leftDrivetrain, pigeon);
     public static final ArmConfiguration armHelper = new ArmConfiguration(arm, can1);
-    public static final LiftConfiguration liftHelper = new LiftConfiguration(liftMaster);
+    public static final LiftConfiguration liftLeftHelper = new LiftConfiguration(liftLeftMaster);
+    public static final LiftConfiguration liftRightHelper = new LiftConfiguration(liftRightMaster);
 
     public static void initialize() {
         /* Drivetrain Initialization */
@@ -70,15 +71,13 @@ public class RobotMap {
         armHelper.masterSetter();
 
         /* Lift Initialization */
-        liftMaster.configAllSettings(liftHelper);
+        liftLeftMaster.configAllSettings(liftLeftHelper);
+        liftRightMaster.configAllSettings(liftRightHelper);
 
-        liftHelper.masterSetter();
-        liftHelper.slaveSetter(lift2);
-        liftHelper.slaveSetter(lift3);
-        liftHelper.slaveSetter(lift4);
-        lift4.setInverted(true);
-        lift2.setInverted(false);
-        liftMaster.setInverted(false);
-        lift3.setInverted(true);
+        liftLeftHelper.masterSetter();
+        liftRightHelper.masterSetter();
+        
+        liftLeftHelper.slaveSetter(liftLeftSlave);
+        liftRightHelper.slaveSetter(liftRightSlave);
     }
 }
