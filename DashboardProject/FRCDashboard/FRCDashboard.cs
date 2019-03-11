@@ -34,8 +34,8 @@ namespace FRCDashboard
         private bool establishedConnectionWithRio;
         private IPEndPoint rioEndPoint;
         private int rioPort = 5801;
-        private byte[] rioBuf = new byte[256];
         private bool attemptingToConnectToRio = false;
+        private RioData rioData = new RioData();
 
         private ConnectionObject connectionObject = new ConnectionObject();
         private bool setConnectionGridObject = true;
@@ -58,6 +58,7 @@ namespace FRCDashboard
 
             grdConnectionProperties.SelectedObject = connectionObject;
             grdRaspPi.SelectedObject = raspberryPiData;
+            grdRio.SelectedObject = rioData;
             st.Start();
         }
 
@@ -115,13 +116,26 @@ namespace FRCDashboard
                 rioClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 rioEndPoint = new IPEndPoint(IPAddress.Any, rioPort);
 
-                new System.Threading.Thread(RioConnectThread).Start();
+                while (!establishedConnectionWithRio && rioClient != null && runThreads)
+                {
+                    rioClient.Connect(rioAddress, rioPort);
+                    rioClient.Send(new byte[] { 0x33 }, 1);
+                    byte[] ret = rioClient.Receive(ref rioEndPoint);
+                    if (ret[0] == 0x77 && ret[1] == 0x62)
+                    {
+                        establishedConnectionWithRio = true;
+                        new System.Threading.Thread(RioUpdateThread).Start();
+                    }
+                    System.Threading.Thread.Sleep(1000);
+                }
             }
             catch
             {
                 rioStringAddress = "Could not resolve " + connectionObject.RoboRioAddress;
             }
             connectionObject.SetRioIp(rioStringAddress);
+
+            attemptingToConnectToRio = false;
         }
 
         private void PiUpdateThread()
@@ -164,35 +178,71 @@ namespace FRCDashboard
                 System.Threading.Thread.Sleep(100);
             }
         }
-
-        private void RioConnectThread()
-        {
-            while (!establishedConnectionWithRio && rioClient != null && runThreads)
-            {
-                try
-                {
-                    rioClient.Connect(rioAddress, rioPort);
-                    rioClient.Send(new byte[] { 0x33 }, 1);
-                    byte[] ret = rioClient.Receive(ref rioEndPoint);
-                    if (ret[0] == 0x77 && ret[1] == 0x62)
-                    {
-                        establishedConnectionWithRio = true;
-                        new System.Threading.Thread(UpdateRioBuf).Start();
-                    }
-                }
-                catch { }
-            }
-            attemptingToConnectToRio = false;
-        }
-        private void UpdateRioBuf()
+        private void RioUpdateThread()
         {
             while (runThreads)
             {
+                byte[] rioBuf;
                 try
                 {
                     rioBuf = rioClient.Receive(ref rioEndPoint);
                 }
-                catch { }
+                catch
+                {
+                    establishedConnectionWithRio = false;
+                    break;
+                }
+
+                double p1x = BitConverter.ToDouble(rioBuf, 0);
+                double p1y = BitConverter.ToDouble(rioBuf, 8);
+                double p2x = BitConverter.ToDouble(rioBuf, 16);
+                double p2y = BitConverter.ToDouble(rioBuf, 24);
+                double p3x = BitConverter.ToDouble(rioBuf, 32);
+                double p3y = BitConverter.ToDouble(rioBuf, 40);
+                double p4x = BitConverter.ToDouble(rioBuf, 48);
+                double p4y = BitConverter.ToDouble(rioBuf, 56);
+
+                double leftDist = BitConverter.ToDouble(rioBuf, 64);
+                double rightDist = BitConverter.ToDouble(rioBuf, 72);
+                double yaw = BitConverter.ToDouble(rioBuf, 80);
+
+                bool ready = rioBuf[88] == 1;
+
+                int stringSize = BitConverter.ToInt16(rioBuf, 89);
+
+                string arbitraryString = BitConverter.ToString(rioBuf, 91, stringSize);
+
+                if(BitConverter.IsLittleEndian)
+                {
+                    FlipDouble(ref p1x);
+                    FlipDouble(ref p1y);
+                    FlipDouble(ref p2x);
+                    FlipDouble(ref p2y);
+                    FlipDouble(ref p3x);
+                    FlipDouble(ref p3y);
+                    FlipDouble(ref p4x);
+                    FlipDouble(ref p4y);
+
+                    FlipDouble(ref leftDist);
+                    FlipDouble(ref rightDist);
+                    FlipDouble(ref yaw);
+
+                    FlipString(ref arbitraryString);
+                }
+
+                rioData.SetP1(new RioData.Point(p1x, p1y));
+                rioData.SetP2(new RioData.Point(p2x, p2y));
+                rioData.SetP3(new RioData.Point(p3x, p3y));
+                rioData.SetP4(new RioData.Point(p4x, p4y));
+
+                rioData.SetLeftDist(leftDist);
+                rioData.SetRightDist(rightDist);
+                rioData.SetYaw(yaw);
+
+                rioData.SetPigeonState(ready);
+
+                rioData.SetArbitraryString(arbitraryString);
+
                 System.Threading.Thread.Sleep(100);
             }
         }
@@ -208,6 +258,16 @@ namespace FRCDashboard
             var ar = BitConverter.GetBytes(lng);
             Array.Reverse(ar);
             lng = BitConverter.ToInt64(ar, 0);
+        }
+        private void FlipString(ref string str)
+        {
+            char[] strArray = new char[str.Length];
+            int sz = str.Length;
+            foreach(char c in str)
+            {
+                strArray[--sz] = c;
+            }
+            str = strArray.ToString();
         }
 
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.robot.dashboard.Dashboard;
 import frc.robot.hardware.RobotMap;
 import frc.robot.subsystem.*;
 import frc.robot.subsystem.Arm;
@@ -15,6 +16,8 @@ public class RobotVault {
 
     private DeviceChecker deviceChecker;
 
+    private Dashboard dashboardRef;
+
     public RobotVault() {
         RobotMap.initialize();
 
@@ -28,6 +31,8 @@ public class RobotVault {
 
         deviceChecker = new DeviceChecker(RobotMap.liftLeftHelper, RobotMap.liftRightHelper, RobotMap.armHelper, 
             RobotMap.leftDriveHelper, RobotMap.rightDriveHelper);
+
+        dashboardRef = new Dashboard();
     }
 
     public void periodicTasks() {
@@ -61,5 +66,6 @@ public class RobotVault {
         }
         
         deviceChecker.checkForResets();
+        dashboardRef.executePeriodically();
     }
 }

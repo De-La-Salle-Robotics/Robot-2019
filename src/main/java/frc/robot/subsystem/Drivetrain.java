@@ -1,4 +1,5 @@
 package frc.robot.subsystem;
+import frc.robot.dashboard.Dashboard;
 import frc.robot.hardware.RobotMap;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -6,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.FollowerType;
 import com.ctre.phoenix.motorcontrol.can.*;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import com.ctre.phoenix.sensors.PigeonIMU.PigeonState;
 
 import frc.robot.pathfinder.BezierCurve;
 import frc.robot.pathfinder.Localization;
@@ -111,6 +113,18 @@ public class Drivetrain {
             arcadeDrive(throttle, wheel);
             curve = null;
         }
+
+        updateDashboard();
+    }
+
+    private void updateDashboard()
+    {
+        double[] ypr = new double[3];
+        pigeon.getYawPitchRoll(ypr);
+        Dashboard.dataStruct.leftDist = leftside.getSelectedSensorPosition();
+        Dashboard.dataStruct.rightDist = rightside.getSelectedSensorPosition();
+        Dashboard.dataStruct.yaw = ypr[0];
+        Dashboard.dataStruct.pigeonReady = pigeon.getState() == PigeonState.Ready;
     }
 
     public void arcadeDrive(double throttle, double wheel) {
@@ -132,6 +146,11 @@ public class Drivetrain {
         distanceToTravel = 0;
 
         currentT = 0;
+        
+        Dashboard.dataStruct.p1 = robotPoint;
+        Dashboard.dataStruct.p2 = c2;
+        Dashboard.dataStruct.p3 = c3;
+        Dashboard.dataStruct.p4 = endPoint;
 
         curve = new BezierCurve(robotPoint, c2, c3, endPoint);
     }

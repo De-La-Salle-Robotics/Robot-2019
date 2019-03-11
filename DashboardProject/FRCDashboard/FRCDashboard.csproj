@@ -73,6 +73,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaspberryPiData.cs" />
+    <Compile Include="RioData.cs" />
     <EmbeddedResource Include="FRCDashboard.resx">
       <DependentUpon>FRCDashboard.cs</DependentUpon>
     </EmbeddedResource>

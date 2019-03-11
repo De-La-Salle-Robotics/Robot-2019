@@ -146,7 +146,7 @@
             this.grdRio.Location = new System.Drawing.Point(3, 128);
             this.grdRio.Name = "grdRio";
             this.grdRio.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.grdRio.Size = new System.Drawing.Size(253, 119);
+            this.grdRio.Size = new System.Drawing.Size(253, 160);
             this.grdRio.TabIndex = 4;
             this.grdRio.ToolbarVisible = false;
             // 
@@ -167,14 +167,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             chartArea1.Name = "ChartArea1";
             this.chrtBezierDisplay.ChartAreas.Add(chartArea1);
-            this.chrtBezierDisplay.Location = new System.Drawing.Point(3, 253);
+            this.chrtBezierDisplay.Location = new System.Drawing.Point(3, 294);
             this.chrtBezierDisplay.Name = "chrtBezierDisplay";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
             series1.Name = "BezierCurvePoints";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Double;
             this.chrtBezierDisplay.Series.Add(series1);
-            this.chrtBezierDisplay.Size = new System.Drawing.Size(274, 283);
+            this.chrtBezierDisplay.Size = new System.Drawing.Size(274, 242);
             this.chrtBezierDisplay.TabIndex = 0;
             this.chrtBezierDisplay.Text = "chart1";
             // 
