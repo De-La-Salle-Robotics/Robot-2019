@@ -217,7 +217,7 @@ public final class Main {
 		CameraConfig config = cameraConfigs.get(0);
 		
 		System.out.println("Starting camera '" + config.name + "' on " + config.path);
-		UsbCamera camera = new UsbCamera(config.name, config.path);
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture(config.name, config.path);
 		MjpegServer server = new MjpegServer("CameraStream", UsefulStuff.CAMERA_PORT);
 		CvSource cvSource = new CvSource("cvsource", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
 		server.setSource(cvSource);

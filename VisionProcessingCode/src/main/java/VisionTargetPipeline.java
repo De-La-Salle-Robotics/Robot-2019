@@ -26,10 +26,10 @@ import org.opencv.objdetect.*;
 public class VisionTargetPipeline implements VisionPipeline {
 
 	//Outputs
+	private Mat resizeImageOutput = new Mat();
 	private Mat hsvThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
-	private Mat resizeImageOutput = new Mat();
 
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -39,6 +39,13 @@ public class VisionTargetPipeline implements VisionPipeline {
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
 	@Override	public void process(Mat source0) {
+		// Step Resize_Image0:
+		Mat resizeImageInput = source0;
+		double resizeImageWidth = 320.0;
+		double resizeImageHeight = 240.0;
+		int resizeImageInterpolation = Imgproc.INTER_NEAREST;
+		resizeImage(resizeImageInput, resizeImageWidth, resizeImageHeight, resizeImageInterpolation, resizeImageOutput);
+
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
 		double[] hsvThresholdHue = {63.129496402877706, 86.31399317406144};
@@ -66,13 +73,14 @@ public class VisionTargetPipeline implements VisionPipeline {
 		double filterContoursMaxRatio = 1000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
-		// Step Resize_Image0:
-		Mat resizeImageInput = source0;
-		double resizeImageWidth = 320.0;
-		double resizeImageHeight = 240.0;
-		int resizeImageInterpolation = Imgproc.INTER_NEAREST;
-		resizeImage(resizeImageInput, resizeImageWidth, resizeImageHeight, resizeImageInterpolation, resizeImageOutput);
+	}
 
+	/**
+	 * This method is a generated getter for the output of a Resize_Image.
+	 * @return Mat output from Resize_Image.
+	 */
+	public Mat resizeImageOutput() {
+		return resizeImageOutput;
 	}
 
 	/**
@@ -99,14 +107,19 @@ public class VisionTargetPipeline implements VisionPipeline {
 		return filterContoursOutput;
 	}
 
-	/**
-	 * This method is a generated getter for the output of a Resize_Image.
-	 * @return Mat output from Resize_Image.
-	 */
-	public Mat resizeImageOutput() {
-		return resizeImageOutput;
-	}
 
+	/**
+	 * Scales and image to an exact size.
+	 * @param input The image on which to perform the Resize.
+	 * @param width The width of the output in pixels.
+	 * @param height The height of the output in pixels.
+	 * @param interpolation The type of interpolation.
+	 * @param output The image in which to store the output.
+	 */
+	private void resizeImage(Mat input, double width, double height,
+		int interpolation, Mat output) {
+		Imgproc.resize(input, output, new Size(width, height), 0.0, 0.0, interpolation);
+	}
 
 	/**
 	 * Segment an image based on hue, saturation, and value ranges.
@@ -193,19 +206,6 @@ public class VisionTargetPipeline implements VisionPipeline {
 			if (ratio < minRatio || ratio > maxRatio) continue;
 			output.add(contour);
 		}
-	}
-
-	/**
-	 * Scales and image to an exact size.
-	 * @param input The image on which to perform the Resize.
-	 * @param width The width of the output in pixels.
-	 * @param height The height of the output in pixels.
-	 * @param interpolation The type of interpolation.
-	 * @param output The image in which to store the output.
-	 */
-	private void resizeImage(Mat input, double width, double height,
-		int interpolation, Mat output) {
-		Imgproc.resize(input, output, new Size(width, height), 0.0, 0.0, interpolation);
 	}
 
 

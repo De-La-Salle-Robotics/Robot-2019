@@ -12,6 +12,7 @@ import java.util.Comparator;
 
 
 public class UsefulStuff implements Runnable {
+    public static final int CAMERA_STREAM_PORT = 1181;
     public static final int CAMERA_PORT = 1182;
 
     static class UdpData
@@ -89,7 +90,7 @@ public class UsefulStuff implements Runnable {
                 port = packet.getPort();
 
                 packet = new DatagramPacket(buf, buf.length, computerAddress, port);
-                packet.setData(new byte[] { 0x77, 0x62, (byte)CAMERA_PORT, (byte)(CAMERA_PORT >> 8) });
+                packet.setData(new byte[] { 0x77, 0x62, (byte)CAMERA_STREAM_PORT, (byte)(CAMERA_STREAM_PORT >> 8), (byte)CAMERA_PORT, (byte)(CAMERA_PORT >> 8) });
                 computerSocket.send(packet);
                 System.out.println("=========================Got UDP Frame========================");
                 System.out.println("Computer IP: " + computerAddress.toString() + ":" + port);

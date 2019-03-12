@@ -8,8 +8,8 @@ namespace FRCDashboard
 {
     class ConnectionObject
     {
-        public string RaspberryPiAddress { get; set; } = "frcvision.local";
-        public string RoboRioAddress { get; set; } = "roborio-7762-frc.local";
+        public string RaspberryPiAddress { get; set; } = "10.77.62.6";
+        public string RoboRioAddress { get; set; } = "10.77.62.2";
 
         public string RaspberryPiIp { get; private set; }
         public int    RaspberryPiPort { get; private set; }

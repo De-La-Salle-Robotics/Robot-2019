@@ -20,6 +20,7 @@ namespace FRCDashboard
     {
         private MJPEGStream stream;
         private int cameraStreamPort = 0;
+        private int cameraProcessedPort = 0;
 
         private UdpClient raspberryPiClient;
         private IPAddress piAddress;
@@ -28,6 +29,7 @@ namespace FRCDashboard
         private int piPort = 5800;
         private bool attemptingToConnectToPi = false;
         private RaspberryPiData raspberryPiData = new RaspberryPiData();
+        private object piLock = new object();
 
         private UdpClient rioClient;
         private IPAddress rioAddress;
@@ -36,6 +38,9 @@ namespace FRCDashboard
         private int rioPort = 5801;
         private bool attemptingToConnectToRio = false;
         private RioData rioData = new RioData();
+        private object rioLock = new object();
+
+        private object camLock = new object();
 
         private ConnectionObject connectionObject = new ConnectionObject();
         private bool setConnectionGridObject = true;
@@ -67,7 +72,7 @@ namespace FRCDashboard
             string piStringAddress;
             try
             {
-                piAddress = Dns.GetHostAddresses(connectionObject.RaspberryPiAddress)[0];
+                piAddress = IPAddress.Parse(connectionObject.RaspberryPiAddress);
                 piStringAddress = piAddress.ToString();
                 raspberryPiClient = new UdpClient();
                 raspberryPiClient.Client.SendTimeout = 500;
@@ -108,7 +113,7 @@ namespace FRCDashboard
             string rioStringAddress;
             try
             {
-                rioAddress = Dns.GetHostAddresses(connectionObject.RoboRioAddress)[0];
+                rioAddress = IPAddress.Parse(connectionObject.RoboRioAddress);
                 rioStringAddress = rioAddress.ToString();
                 rioClient = new UdpClient();
                 rioClient.Client.SendTimeout = 500;
@@ -168,12 +173,14 @@ namespace FRCDashboard
                     FlipDouble(ref rawMid);
                     FlipLong(ref loopTime);
                 }
-
-                raspberryPiData.SetTargetAngle(angle);
-                raspberryPiData.SetTargetDistance(dist);
-                raspberryPiData.SetRawSeperation(rawSep);
-                raspberryPiData.SetRawMidpoint(rawMid);
-                raspberryPiData.SetLoopTime(loopTime);
+                lock (piLock)
+                {
+                    raspberryPiData.SetTargetAngle(angle);
+                    raspberryPiData.SetTargetDistance(dist);
+                    raspberryPiData.SetRawSeperation(rawSep);
+                    raspberryPiData.SetRawMidpoint(rawMid);
+                    raspberryPiData.SetLoopTime(loopTime);
+                }
 
                 System.Threading.Thread.Sleep(100);
             }
@@ -230,18 +237,21 @@ namespace FRCDashboard
                     FlipString(ref arbitraryString);
                 }
 
-                rioData.SetP1(new RioData.Point(p1x, p1y));
-                rioData.SetP2(new RioData.Point(p2x, p2y));
-                rioData.SetP3(new RioData.Point(p3x, p3y));
-                rioData.SetP4(new RioData.Point(p4x, p4y));
+                lock (rioLock)
+                {
+                    rioData.SetP1(new RioData.Point(p1x, p1y));
+                    rioData.SetP2(new RioData.Point(p2x, p2y));
+                    rioData.SetP3(new RioData.Point(p3x, p3y));
+                    rioData.SetP4(new RioData.Point(p4x, p4y));
 
-                rioData.SetLeftDist(leftDist);
-                rioData.SetRightDist(rightDist);
-                rioData.SetYaw(yaw);
+                    rioData.SetLeftDist(leftDist);
+                    rioData.SetRightDist(rightDist);
+                    rioData.SetYaw(yaw);
 
-                rioData.SetPigeonState(ready);
+                    rioData.SetPigeonState(ready);
 
-                rioData.SetArbitraryString(arbitraryString);
+                    rioData.SetArbitraryString(arbitraryString);
+                }
 
                 System.Threading.Thread.Sleep(100);
             }
@@ -261,28 +271,31 @@ namespace FRCDashboard
         }
         private void FlipString(ref string str)
         {
-            char[] strArray = new char[str.Length];
+            StringBuilder sb = new StringBuilder();
             int sz = str.Length;
-            foreach(char c in str)
+            for(int i = sz; i > 0; i--)
             {
-                strArray[--sz] = c;
+                sb.Append(str[i]);
             }
-            str = strArray.ToString();
+            str = sb.ToString();
         }
 
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)
         {
             try
             {
-                double elapsed = st.ElapsedMilliseconds;
-                if (elapsed == 0) elapsed = 1;
-                raspberryPiData.SetBandwidth(((stream.BytesReceived * 8) / 1e6) * (1000 / elapsed));
-                st.Reset();
-                st.Start();
+                lock (camLock)
+                {
+                    double elapsed = st.ElapsedMilliseconds;
+                    if (elapsed == 0) elapsed = 1;
+                    raspberryPiData.SetBandwidth(((stream.BytesReceived * 8) / 1e6) * (1000 / elapsed));
+                    st.Reset();
+                    st.Start();
 
-                if (pictureBox1.Image != null)
-                    pictureBox1.Image.Dispose();
-                pictureBox1.Image = (Bitmap)e.Frame.Clone();
+                    if (pictureBox1.Image != null)
+                        pictureBox1.Image.Dispose();
+                    pictureBox1.Image = (Bitmap)e.Frame.Clone();
+                }
             }
             catch { }
         }
@@ -333,7 +346,10 @@ namespace FRCDashboard
             else
                 connectionObject = (ConnectionObject)grdConnectionProperties.SelectedObject;
 
-            grdRaspPi.SelectedObject = raspberryPiData;
+            lock(piLock)
+                grdRaspPi.SelectedObject = raspberryPiData;
+            lock(rioLock)
+                grdRio.SelectedObject = rioData;
         }
 
         private void grdConnectionProperties_Enter(object sender, EventArgs e)

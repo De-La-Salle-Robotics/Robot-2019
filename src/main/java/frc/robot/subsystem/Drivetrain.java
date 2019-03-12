@@ -93,7 +93,6 @@ public class Drivetrain {
             }
             lastDriverAssist = driverAssist;
         } else if(System.currentTimeMillis() - timeSinceLastGood > TIME_FOR_NO_CURVE) {
-            System.out.println("Clearing Valid data");
             /* It's been too long since we got valid data, clear the flag */
             ableToDriverAssist = false;
             led.lighting(.431, .258, .956);
