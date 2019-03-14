@@ -2,6 +2,7 @@ package frc.robot.subsystem;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.dashboard.Dashboard;
 
 public class CameraLocalization {
     private final int PIXYCAM_MIDDLE = 178;
@@ -33,10 +34,10 @@ public class CameraLocalization {
     public void onLoop() {
         
         if(validData.getBoolean(false)) {
-            targetAngle = targetAngleEntry.getDouble(-1.0);
+            targetAngle = -targetAngleEntry.getDouble(-1.0);
             distanceFromTarget = targetDistanceEntry.getDouble(-1.0);
             
-            distanceIsValid = (targetAngle > 0 && distanceFromTarget > 0);
+            distanceIsValid = (distanceFromTarget > 0);
         }
     }
 

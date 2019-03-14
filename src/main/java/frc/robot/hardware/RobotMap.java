@@ -45,7 +45,7 @@ public class RobotMap {
 
     /* External devices */
     public static final Port lidarPort = Port.kUSB;
-    public static final NetworkTableInstance ntInst = NetworkTableInstance.create();
+    public static final NetworkTableInstance ntInst = NetworkTableInstance.getDefault();
 
     /* Configuration helpers */
     public static final LeftDriveConfiguration leftDriveHelper = new LeftDriveConfiguration(leftDrivetrain);

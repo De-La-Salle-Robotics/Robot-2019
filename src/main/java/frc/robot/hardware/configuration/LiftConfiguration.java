@@ -8,7 +8,7 @@ public class LiftConfiguration extends VictorSPXConfiguration {
     private VictorSPX masterReference;
     /* Member variables for master device */
     private boolean setInvert = false;
-    private InvertType slaveInvert = InvertType.FollowMaster;
+    private InvertType slaveInvert = InvertType.OpposeMaster;
 
     public LiftConfiguration(VictorSPX masterRef) {
         /* Set Default Configs */

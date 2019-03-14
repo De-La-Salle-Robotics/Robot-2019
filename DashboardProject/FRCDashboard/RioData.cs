@@ -42,6 +42,7 @@ namespace FRCDashboard
 
         public string PigeonState { get; private set; }
 
+        public double StringLength { get; private set; }
         public string ArbitraryString { get; private set; }
 
         public void SetP1(Point p1) { P1 = p1.ToString(); }
@@ -52,6 +53,7 @@ namespace FRCDashboard
         public void SetRightDist(double rightDist) { RightDist = rightDist; }
         public void SetYaw(double yaw) { Yaw = yaw; }
         public void SetPigeonState(bool ready) { PigeonState = ready ? "Ready" : "Not Ready"; }
+        public void SetStringLength(double val) { StringLength = val; }
         public void SetArbitraryString(string val) { ArbitraryString = val; }
     }
 }

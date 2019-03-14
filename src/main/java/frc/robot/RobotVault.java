@@ -41,6 +41,7 @@ public class RobotVault {
         double throttle = -RobotMap.joy1.getRawAxis(1);
         double wheel = RobotMap.joy1.getRawAxis(2);
         boolean driverAssist = RobotMap.joy1.getRawButton(6);
+        int pov = RobotMap.joy2.getPOV();
 
         boolean up = RobotMap.joy2.getRawButton(4);
         boolean down = RobotMap.joy2.getRawButton(1);
@@ -50,10 +51,13 @@ public class RobotVault {
 
         boolean raiseLeft = RobotMap.joy2.getRawButton(5);
         boolean raiseRight = RobotMap.joy2.getRawButton(6);
-        boolean lowerLeft = RobotMap.joy2.getRawButton(7); /* These may actually be axis, IDK what joy2 is */
-        boolean lowerRight = RobotMap.joy2.getRawButton(8);
+        boolean lowerLeft = RobotMap.joy2.getRawAxis(2) > 0.3; /* These may actually be axis, IDK what joy2 is */
+        boolean lowerRight = RobotMap.joy2.getRawAxis(3) > 0.3;
 
-        drivetrain.driveControl(throttle, wheel, driverAssist);
+        throttle = ((throttle > 0) ? 1 : -1) * Math.pow(throttle, 2);
+        wheel *= 0.5;
+
+        drivetrain.driveControl(throttle, wheel, driverAssist, pov);
         arm.armControl(up, down);
         claw.clawControl(close, open);
         hablift.liftControl(raiseLeft, raiseRight, lowerLeft, lowerRight);    

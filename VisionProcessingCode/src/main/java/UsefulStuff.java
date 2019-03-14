@@ -46,9 +46,10 @@ public class UsefulStuff implements Runnable {
         }
     }
     
-	private static double MAX_CAMERA_VALUE = 480;
-	private static double DISTANCE_COEFFICIENT = 3092;
-	private static double PIXEL_DEGREE_COEFFICIENT = 0.1720141821143758644330723260584;
+	private static double MAX_CAMERA_VALUE = 310;
+    private static double DISTANCE_A = 12070;
+    private static double DISTANCE_B = -1.336;
+	private static double PIXEL_DEGREE_COEFFICIENT = 0.1;
 	
 	public static NetworkTableEntry distanceEntry;
 	public static NetworkTableEntry angleEntry;
@@ -160,12 +161,13 @@ public class UsefulStuff implements Runnable {
                 i++;
             }
         }
+        System.out.println("Size is: " + targets.size());
         if(targets.size() == 0) return false;
         IndividualTarget leftTarget = targets.get(0).leftTarget;
         IndividualTarget rightTarget = targets.get(0).rightTarget;
 
 		double seperation = Math.abs(leftTarget.midPoint - rightTarget.midPoint);
-		double distance = DISTANCE_COEFFICIENT / seperation;
+		double distance = DISTANCE_A * Math.pow(seperation, DISTANCE_B);
 		
 		double midpoint = ((leftTarget.midPoint + rightTarget.midPoint) / 2);
 		double angle = (midpoint - (MAX_CAMERA_VALUE / 2)) * PIXEL_DEGREE_COEFFICIENT;

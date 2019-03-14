@@ -142,21 +142,25 @@
             // 
             // grdRio
             // 
+            this.grdRio.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.grdRio.HelpVisible = false;
             this.grdRio.Location = new System.Drawing.Point(3, 128);
             this.grdRio.Name = "grdRio";
             this.grdRio.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.grdRio.Size = new System.Drawing.Size(253, 160);
+            this.grdRio.Size = new System.Drawing.Size(274, 160);
             this.grdRio.TabIndex = 4;
             this.grdRio.ToolbarVisible = false;
             // 
             // grdRaspPi
             // 
+            this.grdRaspPi.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.grdRaspPi.HelpVisible = false;
             this.grdRaspPi.Location = new System.Drawing.Point(3, 3);
             this.grdRaspPi.Name = "grdRaspPi";
             this.grdRaspPi.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.grdRaspPi.Size = new System.Drawing.Size(253, 119);
+            this.grdRaspPi.Size = new System.Drawing.Size(274, 119);
             this.grdRaspPi.TabIndex = 3;
             this.grdRaspPi.ToolbarVisible = false;
             // 

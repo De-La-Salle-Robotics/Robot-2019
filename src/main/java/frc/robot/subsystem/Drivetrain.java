@@ -16,7 +16,7 @@ import frc.robot.pathfinder.PointGenerator;
 
 public class Drivetrain {
     private final double DEGREES_TO_PIGEON = 8192.0;
-    private final long TIME_FOR_CURVE_UPDATE = 100; /* Time in Milliseconds */
+    private final long TIME_FOR_CURVE_UPDATE = 10000; /* Time in Milliseconds */
     private final long TIME_FOR_NO_CURVE = 5000; /* Time in Milliseconds */
     
     private final double INCHES_TO_NATIVE_UNITS = 80.35;
@@ -68,26 +68,27 @@ public class Drivetrain {
         currentT = 0;
     }
 
-    public void driveControl(double throttle, double wheel, boolean driverAssist) {
+    public void driveControl(double throttle, double wheel, boolean driverAssist, int operatorPOV) {
         /* First we calculate if we have the target and can help with driver assistance */
         double distanceFromTarget = cameraLocalization.getDistance();
         double angleToTarget = cameraLocalization.getAngle();
         /* First determine if we can assist driver from distanceFromTarget */
         if(distanceFromTarget > 0) {
-            System.out.println("Valid data");
+            //System.out.println("Valid data");
             led.lighting(.425 , .115 , .0025);
             /* Data is valid, let's set the flag so we can assist driver */
             ableToDriverAssist = true;
             timeSinceLastGood = System.currentTimeMillis();
 
             /* Determine if it's time to recalculate bezier curve */
-            if(//System.currentTimeMillis() - timeOfLastCurveUpdate > TIME_FOR_CURVE_UPDATE &&
-                driverAssist && !lastDriverAssist) {
+            if(System.currentTimeMillis() - timeOfLastCurveUpdate > TIME_FOR_CURVE_UPDATE ||
+                (driverAssist && !lastDriverAssist &&
+                operatorPOV <= 360)) {
                 System.out.println("Recalculating");
                 /* Let's update the curve */
                 double[] ypr = new double[3];
                 pigeon.getYawPitchRoll(ypr);
-                recalculateCurve(ypr[0], angleToTarget, distanceFromTarget);
+                recalculateCurve(ypr[0], angleToTarget, distanceFromTarget, operatorPOV);
                 /* Let's set the time so we don't constantly re-update the curve */
                 timeOfLastCurveUpdate = System.currentTimeMillis();
             }
@@ -133,13 +134,13 @@ public class Drivetrain {
         rightside.set(ControlMode.PercentOutput, rightthrottle);
     }
 
-    public void recalculateCurve(double robotHeading, double targetHeading, double targetDistance) {
+    public void recalculateCurve(double robotHeading, double targetHeading, double targetDistance, double endHeading) {
         Localization.calculatePointOffset(robotHeading, targetDistance, targetHeading);
 
         endPoint = Localization.getSpecifiedPoint();
 
         c2 = pointGen.getControl2(robotPoint, Localization.getSpecifiedHeading(), endPoint);
-        c3 = pointGen.getControl3(robotPoint, endPoint, 0);
+        c3 = pointGen.getControl3(robotPoint, endPoint, endHeading);
 
         distanceWhenRecalculated = rightside.getSelectedSensorPosition();
         distanceToTravel = 0;
@@ -154,11 +155,11 @@ public class Drivetrain {
         curve = new BezierCurve(robotPoint, c2, c3, endPoint);
     }
 
-    public void assistDriveWithGoodVariables(double throttle, double robotHeading, double targetHeading,
+    /*public void assistDriveWithGoodVariables(double throttle, double robotHeading, double targetHeading,
             double targetDistance) {
         recalculateCurve(robotHeading, targetHeading, targetDistance);
         assistDrive(throttle);
-    }
+    }*/
 
     public void assistDrive(double throttle) {
         /* If no valid curve to follow, just drive forward */

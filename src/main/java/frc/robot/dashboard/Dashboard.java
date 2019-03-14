@@ -91,6 +91,7 @@ public class Dashboard implements Runnable{
     {
         if(!connectedWithComputer) return;
 
+        dataStruct.stringLength = dataStruct.arbitraryString.length();
 
         byte[] bytesOfString = new byte[dataStruct.stringLength];
         char[] charsOfString = dataStruct.arbitraryString.toCharArray();

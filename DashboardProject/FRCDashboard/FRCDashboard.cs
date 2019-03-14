@@ -41,6 +41,7 @@ namespace FRCDashboard
         private object rioLock = new object();
 
         private object camLock = new object();
+        private object dataLock = new object();
 
         private ConnectionObject connectionObject = new ConnectionObject();
         private bool setConnectionGridObject = true;
@@ -51,7 +52,9 @@ namespace FRCDashboard
 
         public FRCDashboard()
         {
+            System.Threading.Thread.BeginCriticalRegion();
             InitializeComponent();
+            System.Threading.Thread.EndCriticalRegion();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -76,7 +79,7 @@ namespace FRCDashboard
                 piStringAddress = piAddress.ToString();
                 raspberryPiClient = new UdpClient();
                 raspberryPiClient.Client.SendTimeout = 500;
-                raspberryPiClient.Client.ReceiveTimeout = 500;
+                raspberryPiClient.Client.ReceiveTimeout = 1000;
                 raspberryPiClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 0);
                 piEndPoint = new IPEndPoint(IPAddress.Any, piPort);
                 
@@ -89,10 +92,16 @@ namespace FRCDashboard
                     {
                         cameraStreamPort = ret[2] | ((int)ret[3] << 8);
 
-                        connectionObject.SetPiPort(cameraStreamPort);
-                        stream = new MJPEGStream("http://" + connectionObject.RaspberryPiAddress + ":" + cameraStreamPort + "/stream.mjpg");
-                        stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
-                        stream.Start();
+                        lock (dataLock)
+                        {
+                            connectionObject.SetPiPort(cameraStreamPort);
+                        }
+                        if (stream == null)
+                        {
+                            stream = new MJPEGStream("http://" + connectionObject.RaspberryPiAddress + ":" + cameraStreamPort + "/stream.mjpg");
+                            stream.NewFrame += new NewFrameEventHandler(FinalVideoDevice_NewFrame);
+                            //stream.Start();
+                        }
 
                         establishedConnectionWithPi = true;
                         new System.Threading.Thread(PiUpdateThread).Start();
@@ -104,7 +113,10 @@ namespace FRCDashboard
             {
                 piStringAddress = "Could not resolve " + connectionObject.RaspberryPiAddress;
             }
-            connectionObject.SetPiIp(piStringAddress);
+            lock (dataLock)
+            {
+                connectionObject.SetPiIp(piStringAddress);
+            }
             attemptingToConnectToPi = false;
         }
 
@@ -154,7 +166,11 @@ namespace FRCDashboard
                 }
                 catch
                 {
-                    stream.Stop();
+                    if (stream != null)
+                    {
+                        stream.Stop();
+                        stream = null;
+                    }
                     establishedConnectionWithPi = false;
                     break;
                 }
@@ -199,7 +215,7 @@ namespace FRCDashboard
                     establishedConnectionWithRio = false;
                     break;
                 }
-
+                if (rioBuf.Length < 10) continue;
                 double p1x = BitConverter.ToDouble(rioBuf, 0);
                 double p1y = BitConverter.ToDouble(rioBuf, 8);
                 double p2x = BitConverter.ToDouble(rioBuf, 16);
@@ -215,8 +231,11 @@ namespace FRCDashboard
 
                 bool ready = rioBuf[88] == 1;
 
-                int stringSize = BitConverter.ToInt16(rioBuf, 89);
-
+                Int32 stringSize = BitConverter.ToInt32(rioBuf, 89);
+                if(BitConverter.IsLittleEndian)
+                {
+                    FlipInt(ref stringSize);
+                }
                 string arbitraryString = BitConverter.ToString(rioBuf, 91, stringSize);
 
                 if(BitConverter.IsLittleEndian)
@@ -250,6 +269,7 @@ namespace FRCDashboard
 
                     rioData.SetPigeonState(ready);
 
+                    rioData.SetStringLength(stringSize);
                     rioData.SetArbitraryString(arbitraryString);
                 }
 
@@ -269,11 +289,17 @@ namespace FRCDashboard
             Array.Reverse(ar);
             lng = BitConverter.ToInt64(ar, 0);
         }
+        private void FlipInt(ref Int32 it)
+        {
+            var ar = BitConverter.GetBytes(it);
+            Array.Reverse(ar);
+            it = BitConverter.ToInt32(ar, 0);
+        }
         private void FlipString(ref string str)
         {
             StringBuilder sb = new StringBuilder();
             int sz = str.Length;
-            for(int i = sz; i > 0; i--)
+            for(int i = sz-1; i >= 0; i--)
             {
                 sb.Append(str[i]);
             }
@@ -282,22 +308,17 @@ namespace FRCDashboard
 
         void FinalVideoDevice_NewFrame(object sender, NewFrameEventArgs e)
         {
-            try
+            lock (camLock)
             {
-                lock (camLock)
+                try
                 {
-                    double elapsed = st.ElapsedMilliseconds;
-                    if (elapsed == 0) elapsed = 1;
-                    raspberryPiData.SetBandwidth(((stream.BytesReceived * 8) / 1e6) * (1000 / elapsed));
-                    st.Reset();
-                    st.Start();
-
                     if (pictureBox1.Image != null)
                         pictureBox1.Image.Dispose();
                     pictureBox1.Image = (Bitmap)e.Frame.Clone();
                 }
+
+                catch { }
             }
-            catch { }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -305,8 +326,11 @@ namespace FRCDashboard
             runThreads = false;
             if(raspberryPiClient != null)
                 raspberryPiClient.Dispose();
-            if(stream != null)
+            if (stream != null)
+            {
                 stream.Stop();
+                stream = null;
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -341,10 +365,13 @@ namespace FRCDashboard
                 }
             }
 
-            if (setConnectionGridObject)
-                grdConnectionProperties.SelectedObject = connectionObject;
-            else
-                connectionObject = (ConnectionObject)grdConnectionProperties.SelectedObject;
+            lock (dataLock)
+            {
+                if (setConnectionGridObject)
+                    grdConnectionProperties.SelectedObject = connectionObject;
+                else
+                    connectionObject = (ConnectionObject)grdConnectionProperties.SelectedObject;
+            }
 
             lock(piLock)
                 grdRaspPi.SelectedObject = raspberryPiData;
