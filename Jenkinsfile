@@ -6,9 +6,14 @@ pipeline {
         }
     }
     stages {
-        stage('build') {
+        stage('Build and Test') {
             steps {
                 sh './gradlew build'
+            }
+            post {
+                always {
+                    junit 'build/test-restuls/*.xml'
+                }
             }
         }
     }
